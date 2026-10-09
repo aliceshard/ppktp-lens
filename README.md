@@ -37,7 +37,7 @@
 
 ## 참고
 
-- 글꼴은 Google Fonts(IBM Plex Sans KR, IBM Plex Mono)를 불러옵니다. 인터넷이 막힌 환경에서는 시스템 글꼴로 대신 표시되며 계산에는 영향이 없습니다.
+- 글꼴은 Google Fonts(IBM Plex Sans KR, IBM Plex Mono)를, 수식은 MathJax 3.2.2(cdnjs, 실패 시 jsDelivr)를 불러와 LaTeX로 렌더링합니다. 인터넷이 막힌 환경에서는 시스템 글꼴과 일반 텍스트 수식으로 대신 표시되며 계산에는 영향이 없습니다.
 - 입력값은 브라우저 localStorage에 저장되어 다음에 열 때 그대로 남습니다.
 - 자동 굴절률은 KTP n_y Sellmeier 식(Kato & Takaoka, Appl. Opt. 41, 5040, 2002; 유효 범위 0.43–3.54 μm)입니다. 405 nm는 범위 밖 외삽이므로 결정 데이터시트 값이 있으면 직접 입력하세요.
 - 거리는 얇은 렌즈의 주평면 기준이며, 결정 면 반사, 열 렌즈, 비대칭 빔은 고려하지 않았습니다.

@@ -140,7 +140,7 @@ h3{font-size:.92rem;font-weight:600;margin:0 0 6px}
 .kv dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
 .kv .em{color:var(--crystal);font-weight:500}
 .fig{margin:16px 0 0;overflow-x:auto}
-.fig svg{display:block;width:100%;min-width:620px;height:auto;touch-action:pan-y}
+.fig>svg{display:block;width:100%;min-width:620px;height:auto;touch-action:pan-y}
 .fig figcaption{font-size:.78rem;color:var(--muted);margin-top:4px}
 svg text{font-family:var(--sans);font-size:12px;fill:var(--muted)}
 svg text.m{font-family:var(--mono)}
@@ -167,6 +167,18 @@ tbody tr[aria-selected=true]{background:var(--sel)}
 .note p{margin:8px 0;max-width:95ch;font-size:.85rem;color:var(--muted)}
 @media (prefers-reduced-motion:no-preference){.lrow,tbody tr{transition:background .12s}}
 .btnrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+/* LaTeX (MathJax SVG). Fallback HTML stays visible until MathJax is ready or if it cannot load. */
+.tex{white-space:nowrap}
+.tex mjx-container{display:inline-block;line-height:0}
+.tex mjx-container>svg{overflow:visible;vertical-align:middle}
+.tex.disp{display:block;white-space:normal;overflow-x:auto;overflow-y:hidden;padding:4px 0;text-align:center;font-family:var(--mono);color:var(--fg)}
+.tex.disp.ok{font-family:inherit}
+.tex.disp mjx-container{display:inline-block;font-size:1.08em}
+.eqs{display:flex;flex-wrap:wrap;gap:2px 44px;margin:4px 0 10px;align-items:center}
+.eqs>.tex.disp{flex:0 1 auto;max-width:100%}
+.note .eqs .tex.disp{text-align:left}
+.ps-eqs{display:grid;grid-template-columns:repeat(3,1fr);gap:0 10pt;margin:3pt 0 2pt}
+.ps-eqs .tex.disp{font-size:8pt;padding:1pt 0;text-align:left;overflow:visible}
 
 /* A4 print summary */
 #printSheet{display:none}
@@ -180,7 +192,7 @@ tbody tr[aria-selected=true]{background:var(--sel)}
 .ps-box{border:.75pt solid var(--line);border-radius:4pt;padding:6pt 8pt;break-inside:avoid}
 .ps-box dl{display:grid;grid-template-columns:auto 1fr;gap:1.5pt 10pt;margin:0;font-size:8.5pt}
 .ps-box dt{color:var(--muted)}
-.ps-box dd{margin:0;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.ps-box dd{margin:0;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 .ps-key{border-color:var(--crystal);background:var(--crystal-soft)}
 .ps-big{display:grid;grid-template-columns:repeat(3,1fr);gap:4pt;margin:2pt 0 6pt}
 .ps-big div{display:flex;flex-direction:column}
@@ -188,10 +200,10 @@ tbody tr[aria-selected=true]{background:var(--sel)}
 .ps-big b{font-family:var(--mono);font-size:15pt;font-weight:500;color:var(--crystal);font-variant-numeric:tabular-nums}
 .ps-big small{font-size:8pt;color:var(--muted);font-weight:400}
 .ps-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:4pt 8pt}
-.ps-stats span{display:block;color:var(--muted);font-size:7pt}
+.ps-stats>div>span{display:block;color:var(--muted);font-size:7pt;white-space:nowrap}
 .ps-stats b{font-family:var(--mono);font-weight:500;font-size:10pt;font-variant-numeric:tabular-nums}
 .ps-fig{margin:5pt 0 0;break-inside:avoid}
-.ps-fig svg{width:100%;height:auto;max-height:50mm;display:block}
+.ps-fig>svg{width:100%;height:auto;max-height:47mm;display:block}
 .ps-fig figcaption{font-size:7pt;color:var(--muted)}
 #printSheet table.ps-table{width:100%;min-width:0;border-collapse:collapse;font-size:8pt;margin-top:2pt}
 #printSheet .ps-table th,#printSheet .ps-table td{padding:2pt 5pt;border-bottom:.5pt solid var(--line);text-align:right;white-space:nowrap}
@@ -243,7 +255,7 @@ tbody tr[aria-selected=true]{background:var(--sel)}
       </div>
     </div>
     <div class="field">
-      <span class="lbl" id="xiLbl">무엇을 우선할까요? (목표 ξ)</span>
+      <span class="lbl" id="xiLbl">무엇을 우선할까요? (목표 <span class="tex" data-tex="\xi">ξ</span>)</span>
       <div class="seg wrap" role="group" aria-labelledby="xiLbl" id="xiSeg">
         <button type="button" data-v="0.5">순도 0.5</button>
         <button type="button" data-v="1">공초점 1</button>
@@ -295,10 +307,10 @@ tbody tr[aria-selected=true]{background:var(--sel)}
         <span class="hint" id="nHint"></span>
       </div>
       <div class="field">
-        <label for="dIn">입사 허리 → 렌즈 거리 d<sub>in</sub></label>
+        <label for="dIn">입사 허리 → 렌즈 거리 <span class="tex" data-tex="d_\text{in}">d<sub>in</sub></span></label>
         <div class="unit"><input type="number" id="dIn" value="0" step="10"><span>mm</span></div>
         <span class="hint">콜리메이트된 빔이면 0으로 두세요</span>
-        <label for="m2" style="margin-top:6px">빔 품질 M²</label>
+        <label for="m2" style="margin-top:6px">빔 품질 <span class="tex" data-tex="M^2">M²</span></label>
         <input type="number" id="m2" value="1" step="0.05" min="1">
       </div>
     </div>
@@ -331,7 +343,7 @@ tbody tr[aria-selected=true]{background:var(--sel)}
       <h2>후보 렌즈 <span class="hint" id="listCount"></span></h2>
       <label><input type="checkbox" id="onlyOK"> 조건 만족만</label>
     </div>
-    <div class="lcols" aria-hidden="true"><span>f (mm)</span><span>w<sub>out</sub> μm</span><span>z<sub>R</sub> mm</span><span>ξ (로그)</span><span></span></div>
+    <div class="lcols" aria-hidden="true"><span>f (mm)</span><span><span class="tex" data-tex="w_\text{out}">w<sub>out</sub></span> μm</span><span><span class="tex" data-tex="z_R">z<sub>R</sub></span> mm</span><span><span class="tex" data-tex="\xi">ξ</span> (로그)</span><span></span></div>
     <div class="list" id="list" role="listbox" aria-label="렌즈 선택. 위아래 화살표로 이동"></div>
     <div class="listfoot"><span><i style="background:var(--good-bg);border:1px solid var(--good)"></i>ξ 0.75–4 구간</span><span><i style="background:var(--beam)"></i>목표 ξ</span><span><i style="background:var(--warn)"></i>주의</span><span><i style="background:var(--bad)"></i>사용 곤란</span></div>
   </aside>
@@ -349,7 +361,7 @@ tbody tr[aria-selected=true]{background:var(--sel)}
     </figure>
     <figure class="fig">
       <svg id="svgZoom" viewBox="0 0 900 270" role="img" aria-label="결정 부근의 빔 반경 확대도. 마우스를 올리면 그 위치의 빔 반경이 표시됩니다"></svg>
-      <figcaption>결정 부근 확대도. 가로는 렌즈로부터 거리(mm), 세로는 빔 반경(μm)이며 보라색 띠는 결정 안 레일리 범위 b = 2z<sub>R</sub>입니다. 그래프 위에 마우스를 올리면 그 위치의 빔 크기를 읽을 수 있습니다.</figcaption>
+      <figcaption>결정 부근 확대도. 가로는 렌즈로부터 거리(mm), 세로는 빔 반경(μm)이며 보라색 띠는 결정 안 레일리 범위 b = 2<span class="tex" data-tex="z_R">z<sub>R</sub></span>입니다. 그래프 위에 마우스를 올리면 그 위치의 빔 크기를 읽을 수 있습니다.</figcaption>
     </figure>
     <div class="legend"><span style="--c:var(--beam)">펌프 빔 (1/e² 반경)</span><span style="--c:var(--crystal)">PPKTP 결정</span></div>
   </section>
@@ -360,7 +372,7 @@ tbody tr[aria-selected=true]{background:var(--sel)}
   <div class="tablewrap">
     <table>
       <thead><tr>
-        <th scope="col">f (mm)</th><th scope="col">w<sub>out</sub> (μm)</th><th scope="col">z<sub>R</sub> 공기 (mm)</th><th scope="col">z<sub>R</sub> 결정 (mm)</th><th scope="col">ξ = L/b</th><th scope="col">허리 d<sub>out</sub> (mm)</th><th scope="col">결정 앞면 (mm)</th><th scope="col">면 빔 직경 (μm)</th><th scope="col" style="text-align:left">판정</th>
+        <th scope="col">f (mm)</th><th scope="col"><span class="tex" data-tex="w_\text{out}">w<sub>out</sub></span> (μm)</th><th scope="col"><span class="tex" data-tex="z_R">z<sub>R</sub></span> 공기 (mm)</th><th scope="col"><span class="tex" data-tex="z_R">z<sub>R</sub></span> 결정 (mm)</th><th scope="col"><span class="tex" data-tex="\xi = L/b">ξ = L/b</span></th><th scope="col">허리 <span class="tex" data-tex="d_\text{out}">d<sub>out</sub></span> (mm)</th><th scope="col">결정 앞면 (mm)</th><th scope="col">면 빔 직경 (μm)</th><th scope="col" style="text-align:left">판정</th>
       </tr></thead>
       <tbody id="tbody"></tbody>
     </table>
@@ -369,16 +381,43 @@ tbody tr[aria-selected=true]{background:var(--sel)}
 
 <details class="panel note">
   <summary>계산 방법과 가정</summary>
-  <p><b>집속 허리:</b> <span class="mono">w<sub>out</sub> = w<sub>in</sub>·f / √((d<sub>in</sub>−f)² + z<sub>R,in</sub>²)</span>, <span class="mono">d<sub>out</sub> = f + (d<sub>in</sub>−f)f² / ((d<sub>in</sub>−f)² + z<sub>R,in</sub>²)</span> (Self의 가우시안 빔 렌즈 공식, 얇은 렌즈). 근사식 <span class="mono">fλ/(πw<sub>in</sub>)</span>과의 차이는 상세 정보에 표시합니다. <span class="mono">z<sub>R</sub> = πw<sub>out</sub>²/(M²λ)</span>.</p>
-  <p><b>결정 안:</b> 레일리 길이가 n배 늘어납니다. <span class="mono">z<sub>R,결정</sub> = n·z<sub>R,공기</sub></span>, <span class="mono">b = 2z<sub>R,결정</sub></span>, <span class="mono">ξ = L/b</span>. 길이 L인 결정은 공기 L/n과 같아서 허리가 <span class="mono">L/2·(1−1/n)</span>만큼 뒤로 밀립니다. 그래서 허리를 결정 중심에 두려면 앞면을 <span class="mono">d<sub>out</sub> − L/(2n)</span>에 놓습니다. 결정 면의 빔 반경은 <span class="mono">w<sub>out</sub>√(1+ξ²)</span>입니다.</p>
-  <p><b>ξ 고르기:</b> ξ ≈ 2.84는 Boyd–Kleinman 최적(SHG, SPDC 쌍 생성률 최대)이고, ξ ≈ 1 이하는 단일모드 수집 효율과 스펙트럼 순도에 유리하다고 알려져 있습니다. 추천 렌즈는 개구와 간격 조건을 만족하는 렌즈 중 ξ가 목표에 가장 가까운 것(로그 비율 기준)입니다.</p>
-  <p><b>판정:</b> 개구 투과율은 두께·폭 방향 가우시안 클리핑(erf)으로 계산해 99.5% 미만이면 경고합니다. 근사식 오차가 1%를 넘으면 표시합니다.</p>
-  <p><b>한계:</b> 거리는 얇은 렌즈의 주평면 기준입니다. 평볼록 렌즈는 주평면이 곡면 쪽 꼭짓점 근처에 있으니 마운트 위치를 보정하세요. 결정 면의 반사, 열 렌즈, 비대칭 빔은 고려하지 않았습니다. 자동 굴절률은 KTP n<sub>y</sub> Sellmeier 식(Kato &amp; Takaoka, Appl. Opt. 41, 5040, 2002; 유효 범위 0.43–3.54 μm)이며 405 nm는 범위 밖 외삽입니다. 결정 데이터시트 값이 있으면 직접 입력하세요.</p>
+  <p><b>집속 허리</b> (Self의 가우시안 빔 렌즈 공식, 얇은 렌즈). 입사 허리가 렌즈 앞 <span class="tex" data-tex="d_\text{in}">d<sub>in</sub></span>에 있을 때:</p>
+  <div class="eqs">
+    <div class="tex disp" data-tex="w_\text{out} = \frac{w_\text{in}\, f}{\sqrt{(d_\text{in}-f)^2 + z_{R,\text{in}}^2}}">w_out = w_in·f / √((d_in−f)² + z_R,in²)</div>
+    <div class="tex disp" data-tex="d_\text{out} = f + \frac{(d_\text{in}-f)\,f^2}{(d_\text{in}-f)^2 + z_{R,\text{in}}^2}">d_out = f + (d_in−f)·f² / ((d_in−f)² + z_R,in²)</div>
+  </div>
+  <p><b>레일리 길이와 근사식.</b> 근사식과의 차이는 상세 정보에 표시합니다.</p>
+  <div class="eqs">
+    <div class="tex disp" data-tex="z_{R,\text{in}} = \frac{\pi w_\text{in}^2}{M^2 \lambda}">z_R,in = π·w_in² / (M²λ)</div>
+    <div class="tex disp" data-tex="z_R = \frac{\pi w_\text{out}^2}{M^2 \lambda}">z_R = π·w_out² / (M²λ)</div>
+    <div class="tex disp" data-tex="w_\text{out} \approx \frac{M^2 f \lambda}{\pi w_\text{in}} \quad (z_{R,\text{in}} \gg f)">w_out ≈ M²fλ / (π·w_in)</div>
+  </div>
+  <p><b>결정 안.</b> 레일리 길이가 n배 늘어나고, 길이 L인 결정은 공기 L/n과 같아서 허리가 Δz만큼 뒤로 밀립니다. 그래서 허리를 결정 중심에 두려면 앞면을 <span class="tex" data-tex="z_\text{front}">z<sub>front</sub></span>에 놓습니다.</p>
+  <div class="eqs">
+    <div class="tex disp" data-tex="z_R^\text{KTP} = n\, z_R, \qquad b = 2 z_R^\text{KTP}, \qquad \xi = \frac{L}{b}">z_R(KTP) = n·z_R,  b = 2·z_R(KTP),  ξ = L/b</div>
+    <div class="tex disp" data-tex="z_\text{front} = d_\text{out} - \frac{L}{2n}, \qquad \Delta z = \frac{L}{2}\left(1 - \frac{1}{n}\right)">z_front = d_out − L/(2n),  Δz = (L/2)(1 − 1/n)</div>
+    <div class="tex disp" data-tex="w_\text{face} = w_\text{out}\sqrt{1+\xi^2}">w_face = w_out·√(1+ξ²)</div>
+  </div>
+  <p><b>개구 투과율.</b> 결정 두께 t, 폭 W 방향의 가우시안 클리핑으로 계산해 99.5% 미만이면 경고합니다.</p>
+  <div class="eqs">
+    <div class="tex disp" data-tex="T = \operatorname{erf}\!\left(\frac{\sqrt{2}\,(t/2)}{w_\text{face}}\right) \operatorname{erf}\!\left(\frac{\sqrt{2}\,(W/2)}{w_\text{face}}\right)">T = erf(√2·(t/2)/w_face) · erf(√2·(W/2)/w_face)</div>
+  </div>
+  <p><b>ξ 고르기.</b> <span class="tex" data-tex="\xi \approx 2.84">ξ ≈ 2.84</span>는 Boyd–Kleinman 최적(SHG, SPDC 쌍 생성률 최대)이고, <span class="tex" data-tex="\xi \lesssim 1">ξ ≲ 1</span>은 단일모드 수집 효율과 스펙트럼 순도에 유리하다고 알려져 있습니다. 추천 렌즈는 개구와 간격 조건을 만족하는 렌즈 중 <span class="tex" data-tex="\left|\ln(\xi/\xi_\text{target})\right|">|ln(ξ/ξ_target)|</span>가 가장 작은 것입니다. 근사식 오차가 1%를 넘으면 표시합니다.</p>
+  <p><b>굴절률 자동값.</b> KTP <span class="tex" data-tex="n_y">n<sub>y</sub></span> Sellmeier 식(Kato &amp; Takaoka, Appl. Opt. 41, 5040, 2002; 유효 범위 0.43–3.54 μm)입니다. 405 nm는 범위 밖 외삽이므로 결정 데이터시트 값이 있으면 직접 입력하세요.</p>
+  <div class="eqs">
+    <div class="tex disp" data-tex="n_y^2 = 3.45018 + \frac{0.04341}{\lambda^2 - 0.04597} + \frac{16.98825}{\lambda^2 - 39.43799} \quad (\lambda\ \text{in}\ \mu\text{m})">n_y² = 3.45018 + 0.04341/(λ² − 0.04597) + 16.98825/(λ² − 39.43799)</div>
+  </div>
+  <p><b>한계.</b> 거리는 얇은 렌즈의 주평면 기준입니다. 평볼록 렌즈는 주평면이 곡면 쪽 꼭짓점 근처에 있으니 마운트 위치를 보정하세요. 결정 면의 반사, 열 렌즈, 비대칭 빔은 고려하지 않았습니다.</p>
 </details>
 </div>
 
 <section id="printSheet" aria-hidden="true"></section>
 
+<script>
+window.MathJax={tex:{inlineMath:[],displayMath:[]},svg:{fontCache:"none"},options:{enableMenu:false,enableAssistiveMml:false},
+  startup:{typeset:false,ready(){MathJax.startup.defaultReady();MathJax.startup.promise.then(function(){window.__mjLoaded=true;if(window.__mjReady)window.__mjReady();});}}};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js" async onerror="var s=document.createElement('script');s.async=true;s.src='https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js';document.head.appendChild(s);"></script>
 <script>
 (function(){
 const $=id=>document.getElementById(id);
@@ -387,6 +426,10 @@ const DEF={}; ids.forEach(k=>{const e=$(k);DEF[k]=e.type==="checkbox"?e.checked:
 const STD=[25,30,35,40,50,60,75,100,125,150,175,200,250,300,400,500];
 let beamMode="r", selF=null, userPicked=false, rows=[], bestF=null, P=null, zoomMap=null;
 const KEY="ppktp-lens-selector-v2";
+const TEXCACHE=new Map(); let mjReady=false;
+function texHTML(tex,disp){const k=(disp?"D":"I")+tex;if(!TEXCACHE.has(k)){let h=null;try{const n=MathJax.tex2svg(tex,{display:!!disp});n.querySelectorAll("mjx-assistive-mml").forEach(x=>x.remove());const sv=n.querySelector("svg");if(sv){sv.setAttribute("aria-hidden","true");sv.removeAttribute("role");}h=n.outerHTML;}catch(e){}TEXCACHE.set(k,h);}return TEXCACHE.get(k);}
+function typesetIn(root){if(!mjReady||!root)return;root.querySelectorAll("[data-tex]:not(.ok)").forEach(el=>{const h=texHTML(el.dataset.tex,el.classList.contains("disp"));if(h){el.innerHTML=h;el.classList.add("ok");el.setAttribute("aria-label",el.dataset.tex);}});}
+window.__mjReady=()=>{mjReady=true;typesetIn(document.body);};
 
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(!s)return;ids.forEach(k=>{const e=$(k);if(s[k]===undefined||!e)return;if(e.type==="checkbox")e.checked=!!s[k];else e.value=s[k];});if(s.beamMode)beamMode=s.beamMode;if(s.adv)$("advBox").open=true;}catch(e){}}
 function save(){try{const s={beamMode,adv:$("advBox").open};ids.forEach(k=>{const e=$(k);s[k]=e.type==="checkbox"?e.checked:e.value;});localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}}
@@ -479,6 +522,7 @@ function run(){
   bestF=best.f;
   if(!userPicked||!rows.some(r=>r.f===selF))selF=bestF;
   renderReco();renderList();renderTable();renderDetail();
+  typesetIn(document.body);
 }
 
 function syncControls(){
@@ -539,6 +583,7 @@ function renderTable(){
 function select(f,from){
   selF=f;userPicked=true;
   renderReco();renderList();renderTable();renderDetail();
+  typesetIn(document.body);
   const btn=$("opt-"+f);
   if(from==="key"&&btn){btn.focus();btn.scrollIntoView({block:"nearest"});}
   if(from==="click"&&window.matchMedia("(max-width:1000px)").matches){
@@ -561,23 +606,23 @@ function renderDetail(){
   $("detTitle").textContent=`f = ${fmm(r.f)} mm 렌즈`;
   $("detChips").innerHTML=(r.f===bestF?'<span class="chip info">★ 추천</span> ':"")+chips(r);
   $("stats").innerHTML=
-    stat("집속 허리 반경 w<sub>out</sub>",fx(r.wOut*1000,2),"μm",`직경 ${fx(2*r.wOut*1000,1)} μm`)+
-    stat("레일리 길이 z<sub>R</sub> (공기)",sig(r.zRair,4),"mm",`${sig(r.zRair/10,4)} cm`)+
-    stat("z<sub>R</sub> (결정 안)",sig(r.zRcr,4),"mm",`b = ${sig(r.b,4)} mm`)+
-    stat("집속 파라미터 ξ",sig(r.xi,3),"",`목표 ${sig(P.xiT,3)}`)+
-    stat("근사식 fλ/πw<sub>in</sub>",fx(r.wApprox*1000,2),"μm",`오차 ${r.approxErr>=0?"+":""}${fx(r.approxErr*100,2)}%`);
+    stat("집속 허리 반경 <span class='tex' data-tex='w_\\text{out}'>w<sub>out</sub></span>",fx(r.wOut*1000,2),"μm",`직경 ${fx(2*r.wOut*1000,1)} μm`)+
+    stat("레일리 길이 <span class='tex' data-tex='z_R'>z<sub>R</sub></span> (공기)",sig(r.zRair,4),"mm",`${sig(r.zRair/10,4)} cm`)+
+    stat("<span class='tex' data-tex='z_R^\\text{KTP}'><span class='tex' data-tex='z_R'>z<sub>R</sub></span><sup>KTP</sup></span> (결정 안)",sig(r.zRcr,4),"mm",`b = ${sig(r.b,4)} mm`)+
+    stat("집속 파라미터 <span class='tex' data-tex='\\xi = L/b'>ξ = L/b</span>",sig(r.xi,3),"",`목표 ${sig(P.xiT,3)}`)+
+    stat("근사식 <span class='tex' data-tex='f\\lambda/\\pi w_\\text{in}'>fλ/πw<sub>in</sub></span>",fx(r.wApprox*1000,2),"μm",`오차 ${r.approxErr>=0?"+":""}${fx(r.approxErr*100,2)}%`);
   $("place").innerHTML=`
     <dt>결정 앞면</dt><dd class="em">${fx(r.front,2)} mm</dd>
     <dt>결정 중심 (허리)</dt><dd class="em">${fx(r.center,2)} mm</dd>
     <dt>결정 뒷면</dt><dd>${fx(r.back,2)} mm</dd>
     <dt>렌즈 초점 F</dt><dd>${fx(r.f,2)} mm</dd>
-    <dt>결정이 없을 때 허리 d<sub>out</sub></dt><dd>${fx(r.dOut,2)} mm</dd>
-    <dt>결정 때문에 허리가 밀리는 거리</dt><dd>+${fx(P.L/2*(1-1/P.n),2)} mm</dd>`;
+    <dt>결정이 없을 때 허리 <span class='tex' data-tex='d_\\text{out}'>d<sub>out</sub></span></dt><dd>${fx(r.dOut,2)} mm</dd>
+    <dt>결정 때문에 허리가 밀리는 거리 <span class='tex' data-tex='\\Delta z'>Δz</span></dt><dd>+${fx(P.L/2*(1-1/P.n),2)} mm</dd>`;
   $("req").innerHTML=`
-    <dt>이 렌즈로 ξ = 1이 되는 결정 길이</dt><dd class="em">${sig(r.b,3)} mm</dd>
-    <dt>이 렌즈로 ξ = 2.84가 되는 결정 길이</dt><dd class="em">${sig(2.84*r.b,3)} mm</dd>
+    <dt>이 렌즈로 <span class='tex' data-tex='\\xi = 1'>ξ = 1</span>이 되는 결정 길이</dt><dd class="em">${sig(r.b,3)} mm</dd>
+    <dt>이 렌즈로 <span class='tex' data-tex='\\xi = 2.84'>ξ = 2.84</span>가 되는 결정 길이</dt><dd class="em">${sig(2.84*r.b,3)} mm</dd>
     <dt>결정 면에서 빔 직경</dt><dd>${fx(2*r.wFace*1000,1)} μm</dd>
-    <dt>권장 최소 개구 (≈ 3w)</dt><dd>${sig(3*r.wFace,3)} mm</dd>
+    <dt>권장 최소 개구 <span class='tex' data-tex='\\approx 3\\,w_\\text{face}'>≈ 3w</span></dt><dd>${sig(3*r.wFace,3)} mm</dd>
     <dt>${sig(P.apH,3)} × ${sig(P.apW,3)} mm 개구 투과율</dt><dd>${fx(r.T*100,3)}%</dd>
     <dt>렌즈 위치의 빔 직경</dt><dd>${sig(2*r.wLens,4)} mm</dd>`;
   drawLayout(r);drawZoom(r);
@@ -722,31 +767,37 @@ function buildPrint(){
       </div>
       <dl>
         <dt>렌즈 초점 F</dt><dd>${fx(best.f,2)} mm</dd>
-        <dt>결정이 없을 때 허리 d<sub>out</sub></dt><dd>${fx(best.dOut,2)} mm</dd>
-        <dt>결정 때문에 허리가 밀리는 거리</dt><dd>+${fx(P.L/2*(1-1/P.n),2)} mm</dd>
+        <dt>결정이 없을 때 허리 <span class='tex' data-tex='d_\\text{out}'>d<sub>out</sub></span></dt><dd>${fx(best.dOut,2)} mm</dd>
+        <dt>결정 때문에 허리가 밀리는 거리 <span class='tex' data-tex='\\Delta z'>Δz</span></dt><dd>+${fx(P.L/2*(1-1/P.n),2)} mm</dd>
       </dl>
     </section>
   </div>
   <section class="ps-box"><h2>빔 파라미터 (f = ${fmm(best.f)} mm)</h2><div class="ps-stats">
-    ${st("집속 허리 반경 w<sub>out</sub>",fx(best.wOut*1000,2)+" μm")}
-    ${st("허리 직경 2w<sub>out</sub>",fx(2*best.wOut*1000,1)+" μm")}
-    ${st("z<sub>R</sub> (공기)",sig(best.zRair,4)+" mm")}
-    ${st("z<sub>R</sub> (결정 안)",sig(best.zRcr,4)+" mm")}
-    ${st("b = 2z<sub>R,결정</sub>",sig(best.b,4)+" mm")}
-    ${st("ξ = L/b · "+xiClass(best.xi)[0],sig(best.xi,3))}
+    ${st("집속 허리 반경 <span class='tex' data-tex='w_\\text{out}'>w<sub>out</sub></span>",fx(best.wOut*1000,2)+" μm")}
+    ${st("허리 직경 2<span class='tex' data-tex='w_\\text{out}'>w<sub>out</sub></span>",fx(2*best.wOut*1000,1)+" μm")}
+    ${st("<span class='tex' data-tex='z_R'>z<sub>R</sub></span> (공기)",sig(best.zRair,4)+" mm")}
+    ${st("<span class='tex' data-tex='z_R^\\text{KTP}'><span class='tex' data-tex='z_R'>z<sub>R</sub></span><sup>KTP</sup></span> (결정 안)",sig(best.zRcr,4)+" mm")}
+    ${st("b = 2<span class='tex' data-tex='z_R^\\text{KTP}'><span class='tex' data-tex='z_R'>z<sub>R</sub></span><sup>KTP</sup></span>",sig(best.b,4)+" mm")}
+    ${st("<span class='tex' data-tex='\\xi = L/b'>ξ = L/b</span> · "+xiClass(best.xi)[0],sig(best.xi,3))}
     ${st("결정 면 빔 직경",fx(2*best.wFace*1000,1)+" μm")}
     ${st("개구 투과율",fx(best.T*100,2)+"%")}
-    ${st("ξ = 1 / 2.84 되는 L",sig(best.b,3)+" / "+sig(2.84*best.b,3)+" mm")}
-    ${st("근사식 fλ/πw<sub>in</sub> 오차",(best.approxErr>=0?"+":"")+fx(best.approxErr*100,2)+"%")}
+    ${st("<span class='tex' data-tex='\\xi = 1,\\ 2.84'>ξ = 1, 2.84</span>가 되는 L",sig(best.b,3)+" / "+sig(2.84*best.b,3)+" mm")}
+    ${st("근사식 <span class='tex' data-tex='f\\lambda/\\pi w_\\text{in}'>fλ/πw<sub>in</sub></span> 오차",(best.approxErr>=0?"+":"")+fx(best.approxErr*100,2)+"%")}
   </div></section>
   <figure class="ps-fig"><svg viewBox="0 0 900 270" role="img" aria-label="전체 배치도">${layoutSVG(best)}</svg>
     <figcaption>전체 배치도. 가로는 실제 거리 비율, 세로(빔 반경, 결정 두께)는 같은 배율로 확대.</figcaption></figure>
   <figure class="ps-fig"><svg viewBox="0 0 900 270" role="img" aria-label="결정 부근 확대도">${zoomSVG(best,false).s}</svg>
     <figcaption>결정 부근 확대도. 가로는 렌즈로부터 거리(mm), 세로는 빔 반경(μm), 보라색 띠는 결정 안 레일리 범위 b.</figcaption></figure>
   <section class="ps-box" style="margin-top:6pt"><h2>이웃 렌즈 비교</h2>
-    <table class="ps-table"><thead><tr><th>f (mm)</th><th>w<sub>out</sub> (μm)</th><th>z<sub>R</sub> 공기 (mm)</th><th>z<sub>R</sub> 결정 (mm)</th><th>ξ</th><th>앞면 (mm)</th><th>중심 (mm)</th><th>면 빔 직경 (μm)</th><th style="text-align:left">판정</th></tr></thead><tbody>${tbl}</tbody></table>
+    <table class="ps-table"><thead><tr><th>f (mm)</th><th><span class='tex' data-tex='w_\\text{out}'>w<sub>out</sub></span> (μm)</th><th><span class='tex' data-tex='z_R'>z<sub>R</sub></span> 공기 (mm)</th><th><span class='tex' data-tex='z_R'>z<sub>R</sub></span> 결정 (mm)</th><th>ξ</th><th>앞면 (mm)</th><th>중심 (mm)</th><th>면 빔 직경 (μm)</th><th style="text-align:left">판정</th></tr></thead><tbody>${tbl}</tbody></table>
   </section>
-  <p class="ps-foot">w<sub>out</sub> = w<sub>in</sub>·f / √((d<sub>in</sub>−f)² + z<sub>R,in</sub>²), d<sub>out</sub> = f + (d<sub>in</sub>−f)f² / ((d<sub>in</sub>−f)² + z<sub>R,in</sub>²) (Self, 얇은 렌즈). z<sub>R,결정</sub> = n·z<sub>R,공기</sub>, ξ = L/b, 결정 앞면 = d<sub>out</sub> − L/(2n). 최적 렌즈는 개구(투과율 99.5% 이상)와 최소 간격 조건을 만족하는 렌즈 중 ξ가 목표에 가장 가까운 것. 거리는 얇은 렌즈 주평면 기준이며, 평볼록 렌즈는 곡면 쪽 꼭짓점 근처가 주평면입니다. 굴절률 자동값은 KTP n<sub>y</sub> Sellmeier(Kato &amp; Takaoka 2002) 외삽값입니다.${href?` · ${href}`:""}</p>`;
+  <div class="ps-eqs">
+    <div class="tex disp" data-tex="w_\\text{out} = \\frac{w_\\text{in}\\, f}{\\sqrt{(d_\\text{in}-f)^2 + z_{R,\\text{in}}^2}}">w_out = w_in·f / √((d_in−f)² + z_R,in²)</div>
+    <div class="tex disp" data-tex="d_\\text{out} = f + \\frac{(d_\\text{in}-f)\\,f^2}{(d_\\text{in}-f)^2 + z_{R,\\text{in}}^2}">d_out = f + (d_in−f)f² / ((d_in−f)² + z_R,in²)</div>
+    <div class="tex disp" data-tex="\\xi = \\frac{L}{2 n z_R}, \\quad z_\\text{front} = d_\\text{out} - \\frac{L}{2n}">ξ = L/(2n·z_R),  z_front = d_out − L/(2n)</div>
+  </div>
+  <p class="ps-foot">Self의 가우시안 빔 렌즈 공식(얇은 렌즈). 최적 렌즈는 개구(투과율 99.5% 이상)와 최소 간격 조건을 만족하는 렌즈 중 ξ가 목표에 가장 가까운 것. 거리는 얇은 렌즈 주평면 기준이며, 평볼록 렌즈는 곡면 쪽 꼭짓점 근처가 주평면입니다. 굴절률 자동값은 KTP <span class='tex' data-tex='n_y'>n<sub>y</sub></span> Sellmeier(Kato &amp; Takaoka 2002) 외삽값입니다.${href?` · ${href}`:""}</p>`;
+  typesetIn($("printSheet"));
   return true;
 }
 $("printBtn").addEventListener("click",()=>{
@@ -768,6 +819,7 @@ const resetPick=new Set(["beamSize","lambda","L","xiCustom","fMin","fMax","fStep
 ids.forEach(k=>{const e=$(k);if(e.type==="hidden")return;e.addEventListener("input",()=>{if(resetPick.has(k))userPicked=false;run();});});
 
 load();run();
+if(window.__mjLoaded)window.__mjReady();
 })();
 </script>
 </body>
