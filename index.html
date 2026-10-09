@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="입사 빔 크기와 파장, 결정 길이로 후보 렌즈별 집속 허리 w_out, 레일리 길이 z_R, 집속 파라미터 ξ와 type-II PPKTP 결정 설치 위치를 계산합니다.">
+<title>PPKTP 집속 렌즈 선택기</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M2 9 L16 16 L2 23Z' fill='%236a3fd4' opacity='.35'/%3E%3Cpath d='M16 16 L30 9 L30 23Z' fill='%236a3fd4' opacity='.35'/%3E%3Crect x='19' y='12' width='9' height='8' fill='none' stroke='%231b8573' stroke-width='1.5'/%3E%3C/svg%3E">
+<style>
+/* base reset (matches the hosted version) */
+html{color-scheme:light}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+@media print{:root{padding:0}}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* Layout: answer first. Essential inputs → recommendation banner → lens list (left, sticky) beside selected-lens detail (right). */
+:root{
+  --bg:#f5f5f7; --panel:#ffffff; --fg:#17161d; --muted:#5f5c6b; --line:#dddbe4; --line-soft:#ebe9f0;
+  --beam:#6a3fd4; --beam-soft:rgba(106,63,212,.16); --beam-band:rgba(106,63,212,.08); --on-beam:#ffffff;
+  --crystal:#1b8573; --crystal-soft:rgba(27,133,115,.14);
+  --good:#2b7a4b; --good-bg:#e3f2e8; --warn:#9a5a12; --warn-bg:#fbefdc; --bad:#b1362f; --bad-bg:#fbe5e3; --info-bg:#ece7fb;
+  --sel:#f0ebff;
+  --sans:"IBM Plex Sans KR",system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111016; --panel:#1a1921; --fg:#ecebf3; --muted:#a29fb0; --line:#2f2d39; --line-soft:#25232e;
+  --beam:#a58bff; --beam-soft:rgba(165,139,255,.22); --beam-band:rgba(165,139,255,.10); --on-beam:#16121f;
+  --crystal:#49c2ab; --crystal-soft:rgba(73,194,171,.16);
+  --good:#6fd39a; --good-bg:#183224; --warn:#f0b35f; --warn-bg:#3a2a12; --bad:#ff8a80; --bad-bg:#3b1a18; --info-bg:#2a2340;
+  --sel:#262038; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111016; --panel:#1a1921; --fg:#ecebf3; --muted:#a29fb0; --line:#2f2d39; --line-soft:#25232e;
+  --beam:#a58bff; --beam-soft:rgba(165,139,255,.22); --beam-band:rgba(165,139,255,.10); --on-beam:#16121f;
+  --crystal:#49c2ab; --crystal-soft:rgba(73,194,171,.16);
+  --good:#6fd39a; --good-bg:#183224; --warn:#f0b35f; --warn-bg:#3a2a12; --bad:#ff8a80; --bad-bg:#3b1a18; --info-bg:#2a2340;
+  --sel:#262038; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:15px;line-height:1.55;padding-inline:16px;padding-block:22px 48px}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header h1{font-size:1.55rem;font-weight:600;margin:0;letter-spacing:-.01em;text-wrap:balance}
+header p{margin:2px 0 0;color:var(--muted);max-width:75ch}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;min-width:0}
+.eyebrow{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.hint{font-size:.78rem;color:var(--muted)}
+.err{color:var(--bad);font-size:.82rem}
+
+/* inputs */
+.essentials{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px 20px;align-items:start}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field>label,.field>.lbl{font-size:.85rem;color:var(--muted)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row.nw{flex-wrap:nowrap}
+input[type=number],input[type=text],select{font:inherit;font-family:var(--mono);font-size:.95rem;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%;min-width:0}
+select{font-family:var(--sans)}
+input[readonly]{color:var(--muted)}
+input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--beam);outline-offset:2px}
+.unit{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;background:var(--bg);flex:1;min-width:0}
+.unit input{border:0;background:transparent}
+.unit span{padding-right:9px;color:var(--muted);font-size:.85rem;white-space:nowrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex-shrink:0;max-width:100%}
+.seg button{font:inherit;font-size:.83rem;border:0;background:transparent;color:var(--muted);padding:6px 10px;cursor:pointer;white-space:nowrap}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed=true]{background:var(--beam);color:var(--on-beam)}
+.seg.wrap{display:grid;grid-template-columns:repeat(var(--cols,2),minmax(0,1fr));width:100%}
+.seg.wrap button{border-left:0;box-shadow:inset -1px -1px 0 var(--line);padding-inline:6px}
+#lensSeg{--cols:3}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pills button{font:inherit;font-family:var(--mono);font-size:.78rem;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:1px 9px;cursor:pointer}
+.pills button[aria-pressed=true]{border-color:var(--beam);color:var(--beam)}
+details.adv{margin-top:14px;border-top:1px solid var(--line-soft);padding-top:10px}
+details>summary{cursor:pointer;font-size:.88rem;color:var(--muted);user-select:none}
+details>summary:hover{color:var(--fg)}
+.advgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px 20px;margin-top:12px}
+.btn{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:6px;padding:6px 12px;cursor:pointer}
+.btn:hover{border-color:var(--muted)}
+
+/* recommendation */
+.reco{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 20px;align-items:start;border-color:var(--beam);background:var(--sel)}
+.reco h2{margin:2px 0 4px;font-size:1.25rem;font-weight:600;text-wrap:balance}
+.reco h2 .mono{color:var(--beam)}
+.reco p{margin:0;max-width:80ch}
+.reco .alts{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:.85rem;color:var(--muted)}
+.alts button{font:inherit;font-family:var(--mono);font-size:.8rem;border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:6px;padding:2px 9px;cursor:pointer}
+.alts button:hover{border-color:var(--beam)}
+.copyrow{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+@media (max-width:640px){.reco{grid-template-columns:1fr}.copyrow{align-items:flex-start}}
+
+/* main split */
+.split{display:grid;grid-template-columns:minmax(330px,400px) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:1000px){.split{grid-template-columns:minmax(0,1fr)}}
+.listpanel{padding:12px 0 6px;display:flex;flex-direction:column;min-height:0}
+@media (min-width:1001px){.listpanel{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);max-height:calc(100vh - 24px)}}
+.listhead{padding:0 14px 8px;display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.listhead h2{margin:0;font-size:1rem;font-weight:600}
+.listhead label{font-size:.8rem;color:var(--muted);display:flex;gap:5px;align-items:center;cursor:pointer}
+.lcols,.lrow{display:grid;grid-template-columns:62px 1fr 1fr 118px 14px;gap:8px;align-items:center;padding:0 14px}
+.lcols{font-size:.72rem;color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--line-soft)}
+.lcols span:not(:first-child){text-align:right}
+.list{overflow-y:auto;min-height:0}
+.lrow{width:100%;font:inherit;border:0;border-bottom:1px solid var(--line-soft);background:transparent;color:var(--fg);text-align:right;padding-block:7px;cursor:pointer;font-family:var(--mono);font-size:.86rem;font-variant-numeric:tabular-nums}
+.lrow:hover{background:var(--bg)}
+.lrow[aria-selected=true]{background:var(--sel);box-shadow:inset 3px 0 0 var(--beam)}
+.lrow .f{text-align:left;font-weight:500}
+.lrow .star{color:var(--beam);margin-left:3px}
+.lrow.dim{color:var(--muted)}
+.xi{display:flex;flex-direction:column;align-items:stretch;gap:2px}
+.xi .xv{text-align:right}
+.bar{position:relative;height:6px;border-radius:3px;background:var(--line-soft)}
+.bar .zone{position:absolute;top:0;bottom:0;background:var(--good-bg);border-radius:3px}
+.bar .tgt{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--beam);opacity:.55}
+.bar .dot{position:absolute;top:50%;width:9px;height:9px;margin:-4.5px 0 0 -4.5px;border-radius:50%;background:var(--beam)}
+.flag{width:9px;height:9px;border-radius:50%;justify-self:end}
+.flag.warn{background:var(--warn)}.flag.bad{background:var(--bad)}
+.listfoot{padding:8px 14px 2px;font-size:.75rem;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap}
+.listfoot i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px;vertical-align:middle}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* detail */
+.dethead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.dethead h2{margin:0;font-size:1.15rem;font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.stat{border:1px solid var(--line-soft);border-radius:8px;padding:9px 12px;background:var(--bg);min-width:0}
+.stat .k{font-size:.76rem;color:var(--muted)}
+.stat .v{font-family:var(--mono);font-size:1.22rem;font-weight:500;font-variant-numeric:tabular-nums}
+.stat .v small{font-size:.8rem;color:var(--muted);font-weight:400;margin-left:3px}
+.stat .s{font-size:.74rem;color:var(--muted);font-family:var(--mono)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px 22px;margin-top:16px}
+.two>div{min-width:0}
+h3{font-size:.92rem;font-weight:600;margin:0 0 6px}
+.kv{display:grid;grid-template-columns:1fr auto;gap:3px 14px;margin:0}
+.kv dt{color:var(--muted);font-size:.86rem}
+.kv dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.kv .em{color:var(--crystal);font-weight:500}
+.fig{margin:16px 0 0;overflow-x:auto}
+.fig svg{display:block;width:100%;min-width:620px;height:auto;touch-action:pan-y}
+.fig figcaption{font-size:.78rem;color:var(--muted);margin-top:4px}
+svg text{font-family:var(--sans);font-size:12px;fill:var(--muted)}
+svg text.m{font-family:var(--mono)}
+svg text.b{fill:var(--fg);font-weight:500}
+.chip{display:inline-block;font-size:.72rem;padding:1px 7px;border-radius:999px;white-space:nowrap;font-weight:500}
+.chip.good{background:var(--good-bg);color:var(--good)}
+.chip.warn{background:var(--warn-bg);color:var(--warn)}
+.chip.bad{background:var(--bad-bg);color:var(--bad)}
+.chip.info{background:var(--info-bg);color:var(--beam)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.78rem;color:var(--muted);margin-top:6px}
+.legend span::before{content:"";display:inline-block;width:14px;height:8px;margin-right:6px;vertical-align:middle;border-radius:2px;background:var(--c)}
+
+/* full table + notes */
+.tablewrap{overflow-x:auto;margin-top:10px}
+table{border-collapse:collapse;width:100%;min-width:860px;font-size:.86rem}
+th,td{padding:6px 10px;border-bottom:1px solid var(--line-soft);text-align:right;white-space:nowrap}
+th{font-weight:500;color:var(--muted);font-size:.76rem}
+th:first-child,td:first-child{text-align:left}
+td{font-family:var(--mono);font-variant-numeric:tabular-nums}
+td.c{text-align:left;font-family:var(--sans)}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--bg)}
+tbody tr[aria-selected=true]{background:var(--sel)}
+.note p{margin:8px 0;max-width:95ch;font-size:.85rem;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.lrow,tbody tr{transition:background .12s}}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+
+/* A4 print summary */
+#printSheet{display:none}
+#printSheet h1{font-size:15pt;margin:2pt 0 0;font-weight:600;text-wrap:balance}
+#printSheet h1 .mono{color:var(--beam)}
+#printSheet h2{font-size:9.5pt;font-weight:600;margin:0 0 4pt;color:var(--fg)}
+.ps-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12pt;border-bottom:1.2pt solid var(--fg);padding-bottom:5pt;margin-bottom:7pt}
+.ps-eyebrow{font-size:7.5pt;letter-spacing:.06em;color:var(--muted)}
+.ps-meta{font-size:8pt;color:var(--muted);text-align:right;font-family:var(--mono);white-space:nowrap}
+.ps-grid{display:grid;grid-template-columns:1fr 1fr;gap:7pt;margin-bottom:7pt}
+.ps-box{border:.75pt solid var(--line);border-radius:4pt;padding:6pt 8pt;break-inside:avoid}
+.ps-box dl{display:grid;grid-template-columns:auto 1fr;gap:1.5pt 10pt;margin:0;font-size:8.5pt}
+.ps-box dt{color:var(--muted)}
+.ps-box dd{margin:0;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.ps-key{border-color:var(--crystal);background:var(--crystal-soft)}
+.ps-big{display:grid;grid-template-columns:repeat(3,1fr);gap:4pt;margin:2pt 0 6pt}
+.ps-big div{display:flex;flex-direction:column}
+.ps-big span{font-size:7.5pt;color:var(--muted)}
+.ps-big b{font-family:var(--mono);font-size:15pt;font-weight:500;color:var(--crystal);font-variant-numeric:tabular-nums}
+.ps-big small{font-size:8pt;color:var(--muted);font-weight:400}
+.ps-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:4pt 8pt}
+.ps-stats span{display:block;color:var(--muted);font-size:7pt}
+.ps-stats b{font-family:var(--mono);font-weight:500;font-size:10pt;font-variant-numeric:tabular-nums}
+.ps-fig{margin:5pt 0 0;break-inside:avoid}
+.ps-fig svg{width:100%;height:auto;max-height:50mm;display:block}
+.ps-fig figcaption{font-size:7pt;color:var(--muted)}
+#printSheet table.ps-table{width:100%;min-width:0;border-collapse:collapse;font-size:8pt;margin-top:2pt}
+#printSheet .ps-table th,#printSheet .ps-table td{padding:2pt 5pt;border-bottom:.5pt solid var(--line);text-align:right;white-space:nowrap}
+#printSheet .ps-table th{font-size:7pt}
+#printSheet .ps-table th:first-child,#printSheet .ps-table td:first-child,#printSheet .ps-table td.c{text-align:left}
+#printSheet .ps-table tr.best td{font-weight:600}
+.ps-foot{font-size:7pt;color:var(--muted);margin:6pt 0 0;border-top:.75pt solid var(--line);padding-top:4pt;line-height:1.45}
+@media print{
+  @page{size:A4;margin:11mm 13mm}
+  :root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:#ffffff;--panel:#ffffff;--fg:#111015;--muted:#55525f;--line:#cfccd8;--line-soft:#e4e2ea;--beam:#5a32c4;--beam-soft:rgba(90,50,196,.16);--beam-band:rgba(90,50,196,.08);--crystal:#17705f;--crystal-soft:rgba(23,112,95,.13);--good:#22663e;--good-bg:#e3f2e8;--warn:#86500f;--warn-bg:#fbefdc;--bad:#a12f28;--bad-bg:#fbe5e3;--info-bg:#ece7fb;--sel:#f0ebff;color-scheme:light}
+  html,body{background:#fff!important}
+  body{padding:0;font-size:9.5pt;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .wrap{display:none!important}
+  #printSheet{display:block}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Gaussian beam · type-II PPKTP</div>
+  <h1>PPKTP 집속 렌즈 선택기</h1>
+  <p>빔 크기, 파장, 결정 길이만 넣으면 쓸 렌즈와 결정 위치를 바로 알려 줍니다. 다른 렌즈는 왼쪽 목록에서 고르세요.</p>
+</header>
+
+<section class="panel" aria-label="입력">
+  <div class="essentials">
+    <div class="field">
+      <label for="beamSize">입사 빔 크기 (1/e²)</label>
+      <div class="row nw">
+        <div class="unit"><input type="number" id="beamSize" value="0.665" step="0.001" min="0" inputmode="decimal"><span>mm</span></div>
+        <div class="seg" role="group" aria-label="직경 또는 반경">
+          <button type="button" id="modeR" aria-pressed="true">반경</button>
+          <button type="button" id="modeD" aria-pressed="false">직경</button>
+        </div>
+      </div>
+      <span class="hint mono" id="beamConv"></span>
+    </div>
+    <div class="field">
+      <label for="lambda">파장 λ</label>
+      <div class="unit"><input type="number" id="lambda" value="404.95805" step="0.001" min="1" inputmode="decimal"><span>nm</span></div>
+      <span class="hint" id="nShort"></span>
+    </div>
+    <div class="field">
+      <label for="L">결정 길이 L</label>
+      <div class="unit"><input type="number" id="L" value="20" step="1" min="0.1" inputmode="decimal"><span>mm</span></div>
+      <div class="pills" id="Lpresets" aria-label="자주 쓰는 결정 길이">
+        <button type="button" data-v="10">10</button><button type="button" data-v="15">15</button><button type="button" data-v="20">20</button><button type="button" data-v="25">25</button><button type="button" data-v="30">30</button>
+      </div>
+    </div>
+    <div class="field">
+      <span class="lbl" id="xiLbl">무엇을 우선할까요? (목표 ξ)</span>
+      <div class="seg wrap" role="group" aria-labelledby="xiLbl" id="xiSeg">
+        <button type="button" data-v="0.5">순도 0.5</button>
+        <button type="button" data-v="1">공초점 1</button>
+        <button type="button" data-v="2.84">생성률 2.84</button>
+        <button type="button" data-v="custom">직접</button>
+      </div>
+      <input type="number" id="xiCustom" value="1.5" step="0.1" min="0.01" aria-label="목표 ξ 직접 입력" hidden>
+      <input type="hidden" id="xiTarget" value="2.84">
+    </div>
+  </div>
+
+  <details class="adv" id="advBox">
+    <summary>고급 설정: 후보 렌즈 목록, 결정 단면, 굴절률, 입사 빔 조건</summary>
+    <div class="advgrid">
+      <div class="field">
+        <span class="lbl" id="lensLbl">후보 렌즈</span>
+        <div class="seg wrap" role="group" aria-labelledby="lensLbl" id="lensSeg">
+          <button type="button" data-v="step">일정 간격</button>
+          <button type="button" data-v="std">시판 표준 f</button>
+          <button type="button" data-v="list">직접 목록</button>
+        </div>
+        <input type="hidden" id="lensMode" value="step">
+        <div class="row nw" id="stepBox">
+          <div class="field" style="flex:1"><label for="fMin">최소 f</label><input type="number" id="fMin" value="20" step="10" min="1"></div>
+          <div class="field" style="flex:1"><label for="fMax">최대 f</label><input type="number" id="fMax" value="400" step="10" min="1"></div>
+          <div class="field" style="flex:1"><label for="fStep">간격</label><input type="number" id="fStep" value="20" step="5" min="1"></div>
+        </div>
+        <div class="field" id="listBox" hidden>
+          <label for="fList">초점거리 목록 (mm, 쉼표로 구분)</label>
+          <input type="text" id="fList" value="50, 75, 100, 150, 200">
+        </div>
+        <span class="hint" id="stdHint" hidden>25, 30, 35, 40, 50, 60, 75, 100, 125, 150, 175, 200, 250, 300, 400, 500 mm</span>
+      </div>
+      <div class="field">
+        <span class="lbl">결정 단면 (빔이 지나는 개구)</span>
+        <div class="row nw">
+          <div class="unit"><input type="number" id="apH" value="1" step="0.1" min="0.05" aria-label="두께"><span>mm 두께</span></div>
+          <div class="unit"><input type="number" id="apW" value="2" step="0.1" min="0.05" aria-label="폭"><span>mm 폭</span></div>
+        </div>
+        <label for="minGap" class="hint" style="margin-top:6px">렌즈와 결정 앞면 사이 최소 간격 (마운트, 오븐 공간)</label>
+        <div class="unit"><input type="number" id="minGap" value="15" step="1" min="0"><span>mm</span></div>
+      </div>
+      <div class="field">
+        <label for="nMode">펌프 굴절률 n</label>
+        <div class="row nw">
+          <select id="nMode" style="flex:1.3"><option value="auto">KTP n_y 자동</option><option value="manual">직접 입력</option></select>
+          <input type="number" id="nVal" value="1.84" step="0.0001" min="1" style="flex:1" aria-label="굴절률 값">
+        </div>
+        <span class="hint" id="nHint"></span>
+      </div>
+      <div class="field">
+        <label for="dIn">입사 허리 → 렌즈 거리 d<sub>in</sub></label>
+        <div class="unit"><input type="number" id="dIn" value="0" step="10"><span>mm</span></div>
+        <span class="hint">콜리메이트된 빔이면 0으로 두세요</span>
+        <label for="m2" style="margin-top:6px">빔 품질 M²</label>
+        <input type="number" id="m2" value="1" step="0.05" min="1">
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px;justify-content:space-between">
+      <span class="err" id="inErr" role="alert"></span>
+      <button type="button" class="btn" id="resetBtn">기본값으로 되돌리기</button>
+    </div>
+  </details>
+</section>
+
+<section class="panel reco" id="reco" aria-live="polite">
+  <div>
+    <div class="eyebrow" id="recoEyebrow">추천</div>
+    <h2 id="recoTitle"></h2>
+    <p id="recoText"></p>
+    <div class="alts" id="recoAlts"></div>
+  </div>
+  <div class="copyrow">
+    <div class="btnrow">
+      <button type="button" class="btn" id="printBtn">A4 요약 인쇄</button>
+      <button type="button" class="btn" id="copyBtn">선택한 렌즈 결과 복사</button>
+    </div>
+    <span class="hint" id="copyMsg" aria-live="polite"></span>
+  </div>
+</section>
+
+<div class="split">
+  <aside class="panel listpanel" aria-label="후보 렌즈 목록">
+    <div class="listhead">
+      <h2>후보 렌즈 <span class="hint" id="listCount"></span></h2>
+      <label><input type="checkbox" id="onlyOK"> 조건 만족만</label>
+    </div>
+    <div class="lcols" aria-hidden="true"><span>f (mm)</span><span>w<sub>out</sub> μm</span><span>z<sub>R</sub> mm</span><span>ξ (로그)</span><span></span></div>
+    <div class="list" id="list" role="listbox" aria-label="렌즈 선택. 위아래 화살표로 이동"></div>
+    <div class="listfoot"><span><i style="background:var(--good-bg);border:1px solid var(--good)"></i>ξ 0.75–4 구간</span><span><i style="background:var(--beam)"></i>목표 ξ</span><span><i style="background:var(--warn)"></i>주의</span><span><i style="background:var(--bad)"></i>사용 곤란</span></div>
+  </aside>
+
+  <section class="panel" id="detail" aria-live="polite" aria-labelledby="detTitle">
+    <div class="dethead"><h2 id="detTitle"></h2><span id="detChips"></span></div>
+    <div class="stats" id="stats"></div>
+    <div class="two">
+      <div><h3>결정 설치 위치 <span class="hint">렌즈 주평면 기준</span></h3><dl class="kv" id="place"></dl></div>
+      <div><h3>결정 치수 확인</h3><dl class="kv" id="req"></dl></div>
+    </div>
+    <figure class="fig">
+      <svg id="svgLayout" viewBox="0 0 900 270" role="img" aria-label="렌즈에서 결정까지의 전체 배치도"></svg>
+      <figcaption>전체 배치도. 가로는 실제 거리 비율이고, 세로(빔 반경, 결정 두께)는 같은 배율로 확대했습니다.</figcaption>
+    </figure>
+    <figure class="fig">
+      <svg id="svgZoom" viewBox="0 0 900 270" role="img" aria-label="결정 부근의 빔 반경 확대도. 마우스를 올리면 그 위치의 빔 반경이 표시됩니다"></svg>
+      <figcaption>결정 부근 확대도. 가로는 렌즈로부터 거리(mm), 세로는 빔 반경(μm)이며 보라색 띠는 결정 안 레일리 범위 b = 2z<sub>R</sub>입니다. 그래프 위에 마우스를 올리면 그 위치의 빔 크기를 읽을 수 있습니다.</figcaption>
+    </figure>
+    <div class="legend"><span style="--c:var(--beam)">펌프 빔 (1/e² 반경)</span><span style="--c:var(--crystal)">PPKTP 결정</span></div>
+  </section>
+</div>
+
+<details class="panel" id="tableBox">
+  <summary>전체 비교표 보기 <span class="hint" id="tbSub"></span></summary>
+  <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th scope="col">f (mm)</th><th scope="col">w<sub>out</sub> (μm)</th><th scope="col">z<sub>R</sub> 공기 (mm)</th><th scope="col">z<sub>R</sub> 결정 (mm)</th><th scope="col">ξ = L/b</th><th scope="col">허리 d<sub>out</sub> (mm)</th><th scope="col">결정 앞면 (mm)</th><th scope="col">면 빔 직경 (μm)</th><th scope="col" style="text-align:left">판정</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</details>
+
+<details class="panel note">
+  <summary>계산 방법과 가정</summary>
+  <p><b>집속 허리:</b> <span class="mono">w<sub>out</sub> = w<sub>in</sub>·f / √((d<sub>in</sub>−f)² + z<sub>R,in</sub>²)</span>, <span class="mono">d<sub>out</sub> = f + (d<sub>in</sub>−f)f² / ((d<sub>in</sub>−f)² + z<sub>R,in</sub>²)</span> (Self의 가우시안 빔 렌즈 공식, 얇은 렌즈). 근사식 <span class="mono">fλ/(πw<sub>in</sub>)</span>과의 차이는 상세 정보에 표시합니다. <span class="mono">z<sub>R</sub> = πw<sub>out</sub>²/(M²λ)</span>.</p>
+  <p><b>결정 안:</b> 레일리 길이가 n배 늘어납니다. <span class="mono">z<sub>R,결정</sub> = n·z<sub>R,공기</sub></span>, <span class="mono">b = 2z<sub>R,결정</sub></span>, <span class="mono">ξ = L/b</span>. 길이 L인 결정은 공기 L/n과 같아서 허리가 <span class="mono">L/2·(1−1/n)</span>만큼 뒤로 밀립니다. 그래서 허리를 결정 중심에 두려면 앞면을 <span class="mono">d<sub>out</sub> − L/(2n)</span>에 놓습니다. 결정 면의 빔 반경은 <span class="mono">w<sub>out</sub>√(1+ξ²)</span>입니다.</p>
+  <p><b>ξ 고르기:</b> ξ ≈ 2.84는 Boyd–Kleinman 최적(SHG, SPDC 쌍 생성률 최대)이고, ξ ≈ 1 이하는 단일모드 수집 효율과 스펙트럼 순도에 유리하다고 알려져 있습니다. 추천 렌즈는 개구와 간격 조건을 만족하는 렌즈 중 ξ가 목표에 가장 가까운 것(로그 비율 기준)입니다.</p>
+  <p><b>판정:</b> 개구 투과율은 두께·폭 방향 가우시안 클리핑(erf)으로 계산해 99.5% 미만이면 경고합니다. 근사식 오차가 1%를 넘으면 표시합니다.</p>
+  <p><b>한계:</b> 거리는 얇은 렌즈의 주평면 기준입니다. 평볼록 렌즈는 주평면이 곡면 쪽 꼭짓점 근처에 있으니 마운트 위치를 보정하세요. 결정 면의 반사, 열 렌즈, 비대칭 빔은 고려하지 않았습니다. 자동 굴절률은 KTP n<sub>y</sub> Sellmeier 식(Kato &amp; Takaoka, Appl. Opt. 41, 5040, 2002; 유효 범위 0.43–3.54 μm)이며 405 nm는 범위 밖 외삽입니다. 결정 데이터시트 값이 있으면 직접 입력하세요.</p>
+</details>
+</div>
+
+<section id="printSheet" aria-hidden="true"></section>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const ids=["beamSize","lambda","L","xiTarget","xiCustom","lensMode","fMin","fMax","fStep","fList","apH","apW","minGap","nMode","nVal","dIn","m2","onlyOK"];
+const DEF={}; ids.forEach(k=>{const e=$(k);DEF[k]=e.type==="checkbox"?e.checked:e.value;});
+const STD=[25,30,35,40,50,60,75,100,125,150,175,200,250,300,400,500];
+let beamMode="r", selF=null, userPicked=false, rows=[], bestF=null, P=null, zoomMap=null;
+const KEY="ppktp-lens-selector-v2";
+
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(!s)return;ids.forEach(k=>{const e=$(k);if(s[k]===undefined||!e)return;if(e.type==="checkbox")e.checked=!!s[k];else e.value=s[k];});if(s.beamMode)beamMode=s.beamMode;if(s.adv)$("advBox").open=true;}catch(e){}}
+function save(){try{const s={beamMode,adv:$("advBox").open};ids.forEach(k=>{const e=$(k);s[k]=e.type==="checkbox"?e.checked:e.value;});localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}}
+
+function erf(x){const s=Math.sign(x);x=Math.abs(x);const t=1/(1+0.3275911*x);return s*(1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x));}
+function nKTPy(lum){const l2=lum*lum;return Math.sqrt(3.45018+0.04341/(l2-0.04597)+16.98825/(l2-39.43799));}
+function sig(v,d=4){if(!isFinite(v))return"—";const a=Math.abs(v);if(a===0)return"0";const p=Math.max(0,d-1-Math.floor(Math.log10(a)));return v.toFixed(Math.min(p,6));}
+function fx(v,p){return isFinite(v)?v.toFixed(p):"—";}
+function fmm(v){return String(Math.round(v*1000)/1000);}
+
+function lensList(){
+  const m=$("lensMode").value;
+  if(m==="std")return STD.slice();
+  if(m==="list")return [...new Set($("fList").value.split(/[,\s;]+/).map(Number).filter(v=>v>0))].sort((a,b)=>a-b);
+  const a=+$("fMin").value,b=+$("fMax").value,st=+$("fStep").value,out=[];
+  if(a>0&&b>=a&&st>0&&(b-a)/st<=300)for(let f=a;f<=b+1e-9;f+=st)out.push(Math.round(f*1000)/1000);
+  return out;
+}
+
+function readInputs(){
+  const g=k=>parseFloat($(k).value);
+  const size=g("beamSize"), lam=g("lambda");
+  let n=g("nVal");
+  if($("nMode").value==="auto"&&lam>0){n=nKTPy(lam/1000);$("nVal").value=n.toFixed(4);$("nVal").readOnly=true;}else $("nVal").readOnly=false;
+  const xs=$("xiTarget").value;
+  return {win:beamMode==="r"?size:size/2, lam, L:g("L"), xiT:xs==="custom"?g("xiCustom"):parseFloat(xs),
+    apH:g("apH"), apW:g("apW"), minGap:g("minGap")||0, n, dIn:g("dIn")||0, m2:g("m2"), lenses:lensList()};
+}
+
+function validate(P){
+  if(!(P.win>0))return"빔 크기를 0보다 큰 값으로 입력하세요.";
+  if(!(P.lam>0))return"파장을 0보다 큰 값으로 입력하세요.";
+  if(!(P.L>0))return"결정 길이를 0보다 크게 입력하세요.";
+  if(!(P.xiT>0))return"목표 ξ를 0보다 크게 입력하세요.";
+  if(!(P.apH>0&&P.apW>0))return"결정 단면 치수를 0보다 크게 입력하세요.";
+  if(!(P.n>=1))return"굴절률은 1 이상이어야 합니다.";
+  if(!(P.m2>=1))return"M²는 1 이상이어야 합니다.";
+  if(!P.lenses.length)return"후보 렌즈가 없습니다. 고급 설정에서 렌즈 범위나 목록을 확인하세요.";
+  return"";
+}
+
+function compute(f){
+  const le=P.lam*1e-6*P.m2;
+  const zRin=Math.PI*P.win*P.win/le, x=P.dIn-f, den=x*x+zRin*zRin;
+  const dOut=f+x*f*f/den, wOut=P.win*f/Math.sqrt(den), wApprox=f*le/(Math.PI*P.win);
+  const zRair=Math.PI*wOut*wOut/le, zRcr=P.n*zRair, b=2*zRcr, xi=P.L/b;
+  const front=dOut-P.L/(2*P.n), center=front+P.L/2, back=front+P.L;
+  const wFace=wOut*Math.sqrt(1+xi*xi);
+  const T=erf(Math.SQRT2*(P.apH/2)/wFace)*erf(Math.SQRT2*(P.apW/2)/wFace);
+  const r={f,zRin,dOut,wOut,wApprox,zRair,zRcr,b,xi,front,center,back,wFace,T,
+    wLens:P.win*Math.sqrt(1+(P.dIn/zRin)**2), approxErr:(wApprox-wOut)/wOut,
+    apOK:T>=0.995, gapOK:front>=P.minGap};
+  r.ok=r.apOK&&r.gapOK;
+  r.level=(!r.apOK||r.front<0)?"bad":(!r.gapOK||r.xi>=8)?"warn":"";
+  return r;
+}
+
+function xiClass(xi){
+  if(xi<0.3)return["매우 약한 집속","info"];
+  if(xi<0.75)return["약한 집속","info"];
+  if(xi<1.5)return["공초점 근처","good"];
+  if(xi<4)return["BK 최적 근처","good"];
+  if(xi<8)return["강한 집속","warn"];
+  return["과집속","bad"];
+}
+function problems(r){
+  const p=[];
+  if(r.front<0)p.push(["bad","렌즈와 겹침"]);else if(!r.gapOK)p.push(["warn","간격 부족"]);
+  if(!r.apOK)p.push(["bad",`개구 클리핑 ${fx(r.T*100,1)}%`]);
+  if(Math.abs(r.approxErr)>0.01)p.push(["warn",`근사식 오차 ${fx(r.approxErr*100,1)}%`]);
+  return p;
+}
+function chips(r){const [t,c]=xiClass(r.xi);return `<span class="chip ${c}">${t}</span> `+problems(r).map(([c,t])=>`<span class="chip ${c}">${t}</span>`).join(" ");}
+
+/* ---------- main ---------- */
+function run(){
+  syncControls();
+  P=readInputs();
+  $("beamConv").textContent=beamMode==="r"?`직경 2w = ${sig(P.win*2,4)} mm`:`반경 w = ${sig(P.win,4)} mm`;
+  const lum=P.lam/1000, auto=$("nMode").value==="auto";
+  $("nShort").textContent=P.n>0?`결정 굴절률 n = ${P.n.toFixed(4)}${auto?" (자동, 고급 설정에서 변경)":""}`:"";
+  $("nHint").textContent=auto?(lum<0.43||lum>3.54?"Sellmeier 유효 범위(0.43–3.54 μm) 밖 외삽값입니다. 데이터시트 값이 있으면 직접 입력하세요.":"Kato & Takaoka 2002 Sellmeier 식"):"펌프 편광 방향의 굴절률을 넣으세요.";
+  const err=validate(P);$("inErr").textContent=err;
+  if(err){$("recoEyebrow").textContent="입력 확인";$("recoTitle").textContent=err;$("recoText").textContent="";$("recoAlts").innerHTML="";if(!$("advBox").open&&/렌즈|단면|굴절률|M²/.test(err))$("advBox").open=true;return;}
+  save();
+  rows=P.lenses.map(compute);
+  const okRows=rows.filter(r=>r.ok), pool=okRows.length?okRows:rows;
+  const dist=r=>Math.abs(Math.log(r.xi/P.xiT));
+  const best=pool.reduce((a,r)=>dist(r)<dist(a)?r:a,pool[0]);
+  bestF=best.f;
+  if(!userPicked||!rows.some(r=>r.f===selF))selF=bestF;
+  renderReco();renderList();renderTable();renderDetail();
+}
+
+function syncControls(){
+  $("modeR").setAttribute("aria-pressed",beamMode==="r");$("modeD").setAttribute("aria-pressed",beamMode==="d");
+  const xs=$("xiTarget").value;
+  document.querySelectorAll("#xiSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===xs));
+  $("xiCustom").hidden=xs!=="custom";
+  const lm=$("lensMode").value;
+  document.querySelectorAll("#lensSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===lm));
+  $("stepBox").hidden=lm!=="step";$("listBox").hidden=lm!=="list";$("stdHint").hidden=lm!=="std";
+  const Lv=parseFloat($("L").value);
+  document.querySelectorAll("#Lpresets button").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.v===Lv));
+}
+
+function renderReco(){
+  const best=rows.find(r=>r.f===bestF), okRows=rows.filter(r=>r.ok);
+  const goal={"0.5":"순도 우선","1":"공초점","2.84":"생성률 최대"}[$("xiTarget").value]||"직접 지정";
+  if(!okRows.length){
+    $("recoEyebrow").textContent="조건을 모두 만족하는 렌즈가 없습니다";
+    $("recoTitle").innerHTML=`가장 가까운 후보는 <span class="mono">f = ${fmm(best.f)} mm</span>`;
+    $("recoText").innerHTML=`${problems(best).map(p=>p[1]).join(", ")||"조건 미충족"}. 고급 설정에서 최소 간격, 결정 단면, 후보 렌즈 범위를 바꿔 보세요.`;
+  }else{
+    $("recoEyebrow").textContent=`추천 · 목표 ξ = ${sig(P.xiT,3)} (${goal})`;
+    $("recoTitle").innerHTML=`<span class="mono">f = ${fmm(best.f)} mm</span> 렌즈, 결정 앞면을 렌즈에서 <span class="mono">${fx(best.front,1)} mm</span>에`;
+    const diff=best.xi/P.xiT;
+    $("recoText").innerHTML=`결정 중심(허리)은 <span class="mono">${fx(best.center,1)} mm</span>, 집속 허리 반경 <span class="mono">${fx(best.wOut*1000,1)} μm</span>, 결정 안 레일리 길이 <span class="mono">${sig(best.zRcr,3)} mm</span>, ξ = <span class="mono">${sig(best.xi,3)}</span>${Math.abs(Math.log(diff))>Math.log(1.3)?`. 후보 렌즈 간격이 넓어 목표보다 ${diff>1?"강하게":"약하게"} 집속됩니다`:""}.`;
+  }
+  const i=rows.findIndex(r=>r.f===bestF);
+  const near=[rows[i-1],rows[i+1]].filter(Boolean);
+  let html=near.length?`<span>이웃 렌즈</span>`+near.map(r=>`<button type="button" data-f="${r.f}">f ${fmm(r.f)} · ξ ${sig(r.xi,2)}</button>`).join(""):"";
+  if(selF!==bestF)html=`<button type="button" data-f="${bestF}">추천 렌즈로 돌아가기</button>`+html;
+  $("recoAlts").innerHTML=html;
+}
+
+const XI_LO=0.1, XI_HI=30;
+function xiPos(v){const c=Math.min(XI_HI,Math.max(XI_LO,v));return +(Math.log(c/XI_LO)/Math.log(XI_HI/XI_LO)*100).toFixed(1);}
+function renderList(){
+  const only=$("onlyOK").checked;
+  const shown=rows.filter(r=>!only||r.ok||r.f===selF);
+  $("listCount").textContent=`${shown.length}${only?` / ${rows.length}`:""}개`;
+  const z0=xiPos(0.75),z1=xiPos(4),tg=xiPos(P.xiT);
+  $("list").innerHTML=shown.map(r=>{
+    const pr=problems(r).map(p=>p[1]).join(", ");
+    return `<button type="button" class="lrow${r.ok?"":" dim"}" role="option" id="opt-${r.f}" data-f="${r.f}" aria-selected="${r.f===selF}">
+      <span class="f">${fmm(r.f)}${r.f===bestF?'<span class="star" aria-label="추천">★</span>':""}</span>
+      <span>${fx(r.wOut*1000,1)}</span><span>${sig(r.zRair,3)}</span>
+      <span class="xi"><span class="xv">${sig(r.xi,3)}</span><span class="bar"><span class="zone" style="left:${z0}%;width:${(z1-z0).toFixed(1)}%"></span><span class="tgt" style="left:${tg}%"></span><span class="dot" style="left:${xiPos(r.xi)}%"></span></span></span>
+      <span class="flag ${r.level}" title="${pr}">${pr?`<span class="sr">${pr}</span>`:""}</span></button>`;}).join("");
+}
+
+function renderTable(){
+  $("tbSub").textContent=`· ${rows.length}개 렌즈, L = ${sig(P.L,3)} mm, n = ${P.n.toFixed(4)}`;
+  $("tbody").innerHTML=rows.map(r=>`<tr data-f="${r.f}" aria-selected="${r.f===selF}">
+    <td>${fmm(r.f)}${r.f===bestF?" ★":""}</td><td>${fx(r.wOut*1000,2)}</td><td>${sig(r.zRair,4)}</td><td>${sig(r.zRcr,4)}</td><td>${sig(r.xi,3)}</td>
+    <td>${fx(r.dOut,2)}</td><td>${fx(r.front,2)}</td><td>${fx(2*r.wFace*1000,1)}</td><td class="c">${chips(r)}</td></tr>`).join("");
+}
+
+function select(f,from){
+  selF=f;userPicked=true;
+  renderReco();renderList();renderTable();renderDetail();
+  const btn=$("opt-"+f);
+  if(from==="key"&&btn){btn.focus();btn.scrollIntoView({block:"nearest"});}
+  if(from==="click"&&window.matchMedia("(max-width:1000px)").matches){
+    $("detail").scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
+  }
+}
+$("list").addEventListener("click",e=>{const b=e.target.closest(".lrow");if(b)select(+b.dataset.f,"click");});
+$("list").addEventListener("keydown",e=>{
+  if(e.key!=="ArrowDown"&&e.key!=="ArrowUp")return;
+  const btns=[...$("list").querySelectorAll(".lrow")];const i=btns.findIndex(b=>+b.dataset.f===selF);
+  const j=Math.max(0,Math.min(btns.length-1,i+(e.key==="ArrowDown"?1:-1)));
+  if(btns[j]){e.preventDefault();select(+btns[j].dataset.f,"key");}
+});
+$("tbody").addEventListener("click",e=>{const tr=e.target.closest("tr");if(tr)select(+tr.dataset.f,"click");});
+$("recoAlts").addEventListener("click",e=>{const b=e.target.closest("button");if(b)select(+b.dataset.f,"click");});
+
+function stat(k,v,u,s){return`<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u}</small></div>${s?`<div class="s">${s}</div>`:""}</div>`;}
+function renderDetail(){
+  const r=rows.find(x=>x.f===selF);if(!r)return;
+  $("detTitle").textContent=`f = ${fmm(r.f)} mm 렌즈`;
+  $("detChips").innerHTML=(r.f===bestF?'<span class="chip info">★ 추천</span> ':"")+chips(r);
+  $("stats").innerHTML=
+    stat("집속 허리 반경 w<sub>out</sub>",fx(r.wOut*1000,2),"μm",`직경 ${fx(2*r.wOut*1000,1)} μm`)+
+    stat("레일리 길이 z<sub>R</sub> (공기)",sig(r.zRair,4),"mm",`${sig(r.zRair/10,4)} cm`)+
+    stat("z<sub>R</sub> (결정 안)",sig(r.zRcr,4),"mm",`b = ${sig(r.b,4)} mm`)+
+    stat("집속 파라미터 ξ",sig(r.xi,3),"",`목표 ${sig(P.xiT,3)}`)+
+    stat("근사식 fλ/πw<sub>in</sub>",fx(r.wApprox*1000,2),"μm",`오차 ${r.approxErr>=0?"+":""}${fx(r.approxErr*100,2)}%`);
+  $("place").innerHTML=`
+    <dt>결정 앞면</dt><dd class="em">${fx(r.front,2)} mm</dd>
+    <dt>결정 중심 (허리)</dt><dd class="em">${fx(r.center,2)} mm</dd>
+    <dt>결정 뒷면</dt><dd>${fx(r.back,2)} mm</dd>
+    <dt>렌즈 초점 F</dt><dd>${fx(r.f,2)} mm</dd>
+    <dt>결정이 없을 때 허리 d<sub>out</sub></dt><dd>${fx(r.dOut,2)} mm</dd>
+    <dt>결정 때문에 허리가 밀리는 거리</dt><dd>+${fx(P.L/2*(1-1/P.n),2)} mm</dd>`;
+  $("req").innerHTML=`
+    <dt>이 렌즈로 ξ = 1이 되는 결정 길이</dt><dd class="em">${sig(r.b,3)} mm</dd>
+    <dt>이 렌즈로 ξ = 2.84가 되는 결정 길이</dt><dd class="em">${sig(2.84*r.b,3)} mm</dd>
+    <dt>결정 면에서 빔 직경</dt><dd>${fx(2*r.wFace*1000,1)} μm</dd>
+    <dt>권장 최소 개구 (≈ 3w)</dt><dd>${sig(3*r.wFace,3)} mm</dd>
+    <dt>${sig(P.apH,3)} × ${sig(P.apW,3)} mm 개구 투과율</dt><dd>${fx(r.T*100,3)}%</dd>
+    <dt>렌즈 위치의 빔 직경</dt><dd>${sig(2*r.wLens,4)} mm</dd>`;
+  drawLayout(r);drawZoom(r);
+}
+
+/* ---------- beam envelope (mm) at physical z from the lens ---------- */
+function wAt(r,z){
+  if(z<0)return P.win*Math.sqrt(1+((z+P.dIn)/r.zRin)**2);
+  const zeq=z<r.front?z:z<=r.back?r.front+(z-r.front)/P.n:z-P.L*(1-1/P.n);
+  return r.wOut*Math.sqrt(1+((zeq-r.dOut)/r.zRair)**2);
+}
+function envPath(r,z0,z1,X,Y,N){
+  const top=[],bot=[];
+  for(let i=0;i<=N;i++){const z=z0+(z1-z0)*i/N,w=wAt(r,z),x=X(z).toFixed(1);top.push(x+" "+Y(w).toFixed(1));bot.push(x+" "+Y(-w).toFixed(1));}
+  return {fill:"M"+top.join(" L")+" L"+bot.slice().reverse().join(" L")+" Z",top:"M"+top.join(" L"),bot:"M"+bot.join(" L")};
+}
+function niceStep(raw){const p=Math.pow(10,Math.floor(Math.log10(raw)));const m=raw/p;return (m<1.5?1:m<3.5?2:m<7.5?5:10)*p;}
+
+function layoutSVG(r){
+  const cy=112,x0=60,x1=870;
+  const zEnd=Math.max(r.back,r.f,r.dOut)*1.12+5, zStart=-0.14*zEnd;
+  const X=z=>x0+(z-zStart)/(zEnd-zStart)*(x1-x0);
+  const maxR=Math.max(wAt(r,zStart),r.wLens,P.apH/2,wAt(r,zEnd))*1.08;
+  const S=84/maxR, Y=w=>cy-w*S;
+  const env=envPath(r,zStart,zEnd,X,Y,500);
+  let s=`<line x1="${x0-20}" y1="${cy}" x2="${x1+10}" y2="${cy}" stroke="var(--line)" stroke-dasharray="4 4"/>`;
+  s+=`<rect x="${X(r.front)}" y="${Y(P.apH/2)}" width="${Math.max(1,X(r.back)-X(r.front))}" height="${P.apH*S}" fill="var(--crystal-soft)" stroke="var(--crystal)" stroke-width="1.2"/>`;
+  s+=`<path d="${env.fill}" fill="var(--beam-soft)"/><path d="${env.top}" fill="none" stroke="var(--beam)" stroke-width="1.4"/><path d="${env.bot}" fill="none" stroke="var(--beam)" stroke-width="1.4"/>`;
+  const lx=X(0), lh=Math.min(88,Math.max(56,r.wLens*S*1.5));
+  s+=`<path d="M${lx} ${cy-lh} Q${lx+9} ${cy} ${lx} ${cy+lh} Q${lx-9} ${cy} ${lx} ${cy-lh} Z" fill="var(--line)" stroke="var(--muted)"/>`;
+  s+=`<text x="${lx}" y="${cy-lh-8}" text-anchor="middle" class="b">렌즈 f = ${fmm(r.f)} mm</text>`;
+  s+=`<text x="${(X(r.front)+X(r.back))/2}" y="${Math.min(Y(P.apH/2)-8,cy-26)}" text-anchor="middle" class="b" style="fill:var(--crystal)">PPKTP ${sig(P.L,3)} mm</text>`;
+  s+=`<line x1="${X(r.f)}" y1="${cy-6}" x2="${X(r.f)}" y2="${cy+6}" stroke="var(--fg)" stroke-width="1.5"/>`;
+  s+=`<line x1="${X(r.center)}" y1="${cy-36}" x2="${X(r.center)}" y2="${cy+36}" stroke="var(--beam)" stroke-dasharray="3 3"/>`;
+  s+=`<circle cx="${X(r.dOut)}" cy="${cy}" r="3.5" fill="var(--panel)" stroke="var(--muted)"/>`;
+  const ly=Math.min(186,Math.max(cy+40,Y(-P.apH/2)+18)), near=Math.abs(X(r.f)-X(r.dOut))<110;
+  s+=`<text x="${X(r.f)}" y="${ly}" text-anchor="middle">| 초점 F</text>`;
+  s+=`<text x="${X(r.dOut)}" y="${ly+(near?16:0)}" text-anchor="middle">○ 결정 없을 때 허리</text>`;
+  s+=`<text x="${X(zStart)+4}" y="${Y(-wAt(r,zStart))+16}" class="m">입사 2w = ${sig(2*P.win,3)} mm</text>`;
+  const dim=(za,zb,y,label,col)=>{const a=X(za),b=X(zb);return`<line x1="${a}" y1="${y}" x2="${b}" y2="${y}" stroke="${col}"/><line x1="${a}" y1="${y-5}" x2="${a}" y2="${y+5}" stroke="${col}"/><line x1="${b}" y1="${y-5}" x2="${b}" y2="${y+5}" stroke="${col}"/><text x="${(a+b)/2}" y="${y-6}" text-anchor="middle" class="m b" style="fill:${col}">${label}</text>`;};
+  s+=dim(0,r.front,230,`앞면까지 ${fx(r.front,1)} mm`,"var(--crystal)");
+  s+=dim(0,r.center,260,`결정 중심(허리)까지 ${fx(r.center,1)} mm`,"var(--muted)");
+  return s;
+}
+function drawLayout(r){$("svgLayout").innerHTML=layoutSVG(r);}
+
+function zoomSVG(r,interactive){
+  const x0=70,x1=870,cy=118;
+  const pad=Math.max(P.L*0.3,r.zRcr*0.3), z0=r.front-pad, z1=r.back+pad;
+  const X=z=>x0+(z-z0)/(z1-z0)*(x1-x0);
+  let maxW=0;for(let i=0;i<=200;i++)maxW=Math.max(maxW,wAt(r,z0+(z1-z0)*i/200));
+  maxW*=1.15;const S=88/maxW, Y=w=>cy-w*S;
+  const env=envPath(r,z0,z1,X,Y,400);
+  let s=`<rect x="${X(r.front)}" y="${cy-96}" width="${X(r.back)-X(r.front)}" height="192" fill="var(--crystal-soft)"/>`;
+  const ba=Math.max(z0,r.center-r.zRcr), bb=Math.min(z1,r.center+r.zRcr);
+  s+=`<rect x="${X(ba)}" y="${cy-96}" width="${X(bb)-X(ba)}" height="192" fill="var(--beam-band)"/>`;
+  const step=niceStep(maxW*1000/2);
+  for(let v=0;v<=maxW*1000+1e-9;v+=step)for(const sg of[1,-1]){if(!v&&sg<0)continue;const y=Y(sg*v/1000);s+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="var(--line-soft)"/><text x="${x0-6}" y="${y+4}" text-anchor="end" class="m">${sg<0?"−":""}${sig(v,3)}</text>`;}
+  s+=`<text x="${x0-6}" y="${cy-104}" text-anchor="end">μm</text>`;
+  s+=`<line x1="${X(r.front)}" y1="${cy-96}" x2="${X(r.front)}" y2="${cy+96}" stroke="var(--crystal)" stroke-width="1.5"/><line x1="${X(r.back)}" y1="${cy-96}" x2="${X(r.back)}" y2="${cy+96}" stroke="var(--crystal)" stroke-width="1.5"/>`;
+  s+=`<path d="${env.fill}" fill="var(--beam-soft)"/><path d="${env.top}" fill="none" stroke="var(--beam)" stroke-width="1.6"/><path d="${env.bot}" fill="none" stroke="var(--beam)" stroke-width="1.6"/>`;
+  s+=`<line x1="${X(r.center)}" y1="${Y(r.wOut)}" x2="${X(r.center)}" y2="${Y(-r.wOut)}" stroke="var(--fg)" stroke-width="1.2"/>`;
+  if(X(bb)-X(ba)>90)s+=`<text x="${(X(ba)+X(bb))/2}" y="${cy+88}" text-anchor="middle" style="fill:var(--beam)">b = ${sig(r.b,3)} mm</text>`;
+  if(X(r.center)-X(r.front)>120)s+=`<text x="${X(r.front)+6}" y="${cy-82}" class="m">면 2w = ${fx(2*r.wFace*1000,1)} μm</text>`;
+  const ap=P.apH/2;
+  if(ap<maxW)s+=`<line x1="${X(r.front)}" y1="${Y(ap)}" x2="${X(r.back)}" y2="${Y(ap)}" stroke="var(--crystal)" stroke-width="2"/><line x1="${X(r.front)}" y1="${Y(-ap)}" x2="${X(r.back)}" y2="${Y(-ap)}" stroke="var(--crystal)" stroke-width="2"/>`;
+  else s+=`<text x="${X(r.back)-6}" y="${cy-82}" text-anchor="end" style="fill:var(--crystal)">결정 두께 ±${sig(ap,3)} mm (화면 밖)</text>`;
+  const xs=niceStep((z1-z0)/6);
+  for(let v=Math.ceil(z0/xs)*xs;v<=z1;v+=xs)s+=`<text x="${X(v)}" y="${cy+140}" text-anchor="middle" class="m">${sig(v,4)}</text>`;
+  s+=`<text x="${X(r.center)}" y="${cy+114}" text-anchor="middle" class="b m">2w₀ = ${fx(2*r.wOut*1000,1)} μm @ ${fx(r.center,1)} mm</text>`;
+  if(interactive){s+=`<rect x="${x0}" y="${cy-100}" width="${x1-x0}" height="200" fill="transparent"/>`;
+  s+=`<g id="hover" style="pointer-events:none" visibility="hidden"><line id="hvL" y1="${cy-96}" y2="${cy+96}" stroke="var(--fg)" stroke-width="1" stroke-dasharray="2 2"/><rect id="hvB" y="${cy-118}" height="20" rx="4" fill="var(--panel)" stroke="var(--line)"/><text id="hvT" y="${cy-104}" class="m b" text-anchor="middle"></text></g>`;}
+  return {s,map:{x0,x1,z0,z1,r}};
+}
+function drawZoom(r){const z=zoomSVG(r,true);$("svgZoom").innerHTML=z.s;zoomMap=z.map;}
+function hover(e){
+  if(!zoomMap)return;const svg=$("svgZoom"),m=svg.getScreenCTM();if(!m)return;
+  const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const p=pt.matrixTransform(m.inverse());
+  const {x0,x1,z0,z1,r}=zoomMap, g=$("hover");
+  if(p.x<x0||p.x>x1){g.setAttribute("visibility","hidden");return;}
+  const z=z0+(p.x-x0)/(x1-x0)*(z1-z0), w=wAt(r,z);
+  const label=`z = ${fx(z,2)} mm · 2w = ${fx(2*w*1000,1)} μm${z>=r.front&&z<=r.back?" · 결정 안":""}`;
+  const bw=label.length*7.2+18, tx=Math.min(x1-bw/2,Math.max(x0+bw/2,p.x));
+  $("hvL").setAttribute("x1",p.x);$("hvL").setAttribute("x2",p.x);
+  $("hvT").setAttribute("x",tx);$("hvT").textContent=label;
+  $("hvB").setAttribute("x",tx-bw/2);$("hvB").setAttribute("width",bw);
+  g.setAttribute("visibility","visible");
+}
+$("svgZoom").addEventListener("pointermove",hover);
+$("svgZoom").addEventListener("pointerleave",()=>{const g=$("hover");if(g)g.setAttribute("visibility","hidden");});
+
+/* ---------- copy ---------- */
+$("copyBtn").addEventListener("click",()=>{
+  const r=rows.find(x=>x.f===selF);if(!r)return;
+  const txt=[`PPKTP 집속 계산: λ = ${P.lam} nm, w_in = ${sig(P.win,4)} mm (반경, 1/e²), L = ${sig(P.L,3)} mm, n = ${P.n.toFixed(4)}, M² = ${P.m2}`,
+    `렌즈 f = ${fmm(r.f)} mm: w_out = ${fx(r.wOut*1000,2)} μm, z_R(공기) = ${sig(r.zRair,4)} mm, z_R(결정) = ${sig(r.zRcr,4)} mm, b = ${sig(r.b,4)} mm, ξ = ${sig(r.xi,3)}`,
+    `결정 위치(렌즈 주평면 기준): 앞면 ${fx(r.front,2)} mm, 중심 ${fx(r.center,2)} mm, 뒷면 ${fx(r.back,2)} mm`,
+    `결정 면 빔 직경 ${fx(2*r.wFace*1000,1)} μm, 개구 ${sig(P.apH,3)}×${sig(P.apW,3)} mm 투과율 ${fx(r.T*100,2)}%`].join("\n");
+  const done=m=>{$("copyMsg").textContent=m;setTimeout(()=>$("copyMsg").textContent="",2500);};
+  try{navigator.clipboard.writeText(txt).then(()=>done("복사했습니다"),()=>fallback(txt,done));}catch(e){fallback(txt,done);}
+});
+function fallback(txt,done){const ta=document.createElement("textarea");ta.value=txt;ta.style.position="absolute";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand("copy");}catch(e){}ta.remove();done(ok?"복사했습니다":"복사가 막혀 있습니다. 상세 정보를 직접 선택해 주세요");}
+
+/* ---------- A4 print summary ---------- */
+function buildPrint(){
+  if(!P||!rows.length||validate(P))return false;
+  const best=rows.find(r=>r.f===bestF), sel=rows.find(r=>r.f===selF), okAny=rows.some(r=>r.ok);
+  const goal={"0.5":"순도 우선","1":"공초점","2.84":"생성률 최대"}[$("xiTarget").value]||"직접 지정";
+  const now=new Date(), pd=n=>String(n).padStart(2,"0");
+  const stamp=`${now.getFullYear()}-${pd(now.getMonth()+1)}-${pd(now.getDate())} ${pd(now.getHours())}:${pd(now.getMinutes())}`;
+  const lm=$("lensMode").value;
+  const lensDesc=(lm==="step"?`${fmm(+$("fMin").value)}–${fmm(+$("fMax").value)} mm, ${fmm(+$("fStep").value)} mm 간격`:lm==="std"?"시판 표준 초점거리":"직접 입력 목록")+` (${rows.length}개)`;
+  const i=rows.indexOf(best);
+  let nb=rows.slice(Math.max(0,i-2),i+3);
+  if(sel&&!nb.includes(sel))nb=nb.concat(sel).sort((a,b)=>a.f-b.f);
+  const st=(k,v)=>`<div><span>${k}</span><b>${v}</b></div>`;
+  const status=r=>[xiClass(r.xi)[0],...problems(r).map(x=>x[1])].join(", ");
+  const href=/^https?:/.test(location.href)?location.href.split("#")[0]:"";
+  const tbl=nb.map(r=>`<tr class="${r.f===best.f?"best":""}"><td>${fmm(r.f)}${r.f===best.f?" ★":""}${sel&&r.f===sel.f&&r.f!==best.f?" (선택)":""}</td><td>${fx(r.wOut*1000,2)}</td><td>${sig(r.zRair,4)}</td><td>${sig(r.zRcr,4)}</td><td>${sig(r.xi,3)}</td><td>${fx(r.front,2)}</td><td>${fx(r.center,2)}</td><td>${fx(2*r.wFace*1000,1)}</td><td class="c">${status(r)}</td></tr>`).join("");
+  $("printSheet").innerHTML=`
+  <div class="ps-head">
+    <div><div class="ps-eyebrow">PPKTP 집속 렌즈 선택 요약${okAny?"":" · 조건을 모두 만족하는 렌즈가 없어 가장 가까운 후보를 표시"}</div>
+    <h1>최적 렌즈 <span class="mono">f = ${fmm(best.f)} mm</span>, 결정 앞면 <span class="mono">${fx(best.front,1)} mm</span></h1></div>
+    <div class="ps-meta">${stamp}<br>목표 ξ = ${sig(P.xiT,3)} (${goal})</div>
+  </div>
+  <div class="ps-grid">
+    <section class="ps-box"><h2>입력 조건</h2><dl>
+      <dt>파장 λ</dt><dd>${P.lam} nm</dd>
+      <dt>입사 빔 (1/e²)</dt><dd>w = ${sig(P.win,4)} mm · 2w = ${sig(2*P.win,4)} mm</dd>
+      <dt>M² · 입사 허리→렌즈</dt><dd>${P.m2} · ${sig(P.dIn,4)} mm</dd>
+      <dt>결정 길이 L</dt><dd>${sig(P.L,4)} mm</dd>
+      <dt>결정 단면</dt><dd>${sig(P.apH,3)} × ${sig(P.apW,3)} mm</dd>
+      <dt>굴절률 n</dt><dd>${P.n.toFixed(4)} ${$("nMode").value==="auto"?"(KTP n_y 자동)":"(직접 입력)"}</dd>
+      <dt>렌즈–결정 최소 간격</dt><dd>${sig(P.minGap,3)} mm</dd>
+      <dt>후보 렌즈</dt><dd>${lensDesc}</dd>
+    </dl></section>
+    <section class="ps-box ps-key"><h2>결정 설치 거리 (렌즈 주평면 기준)</h2>
+      <div class="ps-big">
+        <div><span>결정 앞면</span><b>${fx(best.front,2)}<small> mm</small></b></div>
+        <div><span>결정 중심 (허리)</span><b>${fx(best.center,2)}<small> mm</small></b></div>
+        <div><span>결정 뒷면</span><b>${fx(best.back,2)}<small> mm</small></b></div>
+      </div>
+      <dl>
+        <dt>렌즈 초점 F</dt><dd>${fx(best.f,2)} mm</dd>
+        <dt>결정이 없을 때 허리 d<sub>out</sub></dt><dd>${fx(best.dOut,2)} mm</dd>
+        <dt>결정 때문에 허리가 밀리는 거리</dt><dd>+${fx(P.L/2*(1-1/P.n),2)} mm</dd>
+      </dl>
+    </section>
+  </div>
+  <section class="ps-box"><h2>빔 파라미터 (f = ${fmm(best.f)} mm)</h2><div class="ps-stats">
+    ${st("집속 허리 반경 w<sub>out</sub>",fx(best.wOut*1000,2)+" μm")}
+    ${st("허리 직경 2w<sub>out</sub>",fx(2*best.wOut*1000,1)+" μm")}
+    ${st("z<sub>R</sub> (공기)",sig(best.zRair,4)+" mm")}
+    ${st("z<sub>R</sub> (결정 안)",sig(best.zRcr,4)+" mm")}
+    ${st("b = 2z<sub>R,결정</sub>",sig(best.b,4)+" mm")}
+    ${st("ξ = L/b · "+xiClass(best.xi)[0],sig(best.xi,3))}
+    ${st("결정 면 빔 직경",fx(2*best.wFace*1000,1)+" μm")}
+    ${st("개구 투과율",fx(best.T*100,2)+"%")}
+    ${st("ξ = 1 / 2.84 되는 L",sig(best.b,3)+" / "+sig(2.84*best.b,3)+" mm")}
+    ${st("근사식 fλ/πw<sub>in</sub> 오차",(best.approxErr>=0?"+":"")+fx(best.approxErr*100,2)+"%")}
+  </div></section>
+  <figure class="ps-fig"><svg viewBox="0 0 900 270" role="img" aria-label="전체 배치도">${layoutSVG(best)}</svg>
+    <figcaption>전체 배치도. 가로는 실제 거리 비율, 세로(빔 반경, 결정 두께)는 같은 배율로 확대.</figcaption></figure>
+  <figure class="ps-fig"><svg viewBox="0 0 900 270" role="img" aria-label="결정 부근 확대도">${zoomSVG(best,false).s}</svg>
+    <figcaption>결정 부근 확대도. 가로는 렌즈로부터 거리(mm), 세로는 빔 반경(μm), 보라색 띠는 결정 안 레일리 범위 b.</figcaption></figure>
+  <section class="ps-box" style="margin-top:6pt"><h2>이웃 렌즈 비교</h2>
+    <table class="ps-table"><thead><tr><th>f (mm)</th><th>w<sub>out</sub> (μm)</th><th>z<sub>R</sub> 공기 (mm)</th><th>z<sub>R</sub> 결정 (mm)</th><th>ξ</th><th>앞면 (mm)</th><th>중심 (mm)</th><th>면 빔 직경 (μm)</th><th style="text-align:left">판정</th></tr></thead><tbody>${tbl}</tbody></table>
+  </section>
+  <p class="ps-foot">w<sub>out</sub> = w<sub>in</sub>·f / √((d<sub>in</sub>−f)² + z<sub>R,in</sub>²), d<sub>out</sub> = f + (d<sub>in</sub>−f)f² / ((d<sub>in</sub>−f)² + z<sub>R,in</sub>²) (Self, 얇은 렌즈). z<sub>R,결정</sub> = n·z<sub>R,공기</sub>, ξ = L/b, 결정 앞면 = d<sub>out</sub> − L/(2n). 최적 렌즈는 개구(투과율 99.5% 이상)와 최소 간격 조건을 만족하는 렌즈 중 ξ가 목표에 가장 가까운 것. 거리는 얇은 렌즈 주평면 기준이며, 평볼록 렌즈는 곡면 쪽 꼭짓점 근처가 주평면입니다. 굴절률 자동값은 KTP n<sub>y</sub> Sellmeier(Kato &amp; Takaoka 2002) 외삽값입니다.${href?` · ${href}`:""}</p>`;
+  return true;
+}
+$("printBtn").addEventListener("click",()=>{
+  if(!buildPrint()){$("copyMsg").textContent="입력값을 먼저 확인하세요";setTimeout(()=>$("copyMsg").textContent="",2500);return;}
+  window.print();
+});
+window.addEventListener("beforeprint",buildPrint);
+try{if(window.self!==window.top)$("printBtn").hidden=true;}catch(e){$("printBtn").hidden=true;}
+
+/* ---------- controls ---------- */
+$("modeR").onclick=()=>{if(beamMode==="r")return;const v=+$("beamSize").value;beamMode="r";if(v>0)$("beamSize").value=+(v/2).toPrecision(6);run();};
+$("modeD").onclick=()=>{if(beamMode==="d")return;const v=+$("beamSize").value;beamMode="d";if(v>0)$("beamSize").value=+(v*2).toPrecision(6);run();};
+$("Lpresets").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;$("L").value=b.dataset.v;userPicked=false;run();});
+$("xiSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;$("xiTarget").value=b.dataset.v;userPicked=false;run();if(b.dataset.v==="custom")$("xiCustom").focus();});
+$("lensSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;$("lensMode").value=b.dataset.v;userPicked=false;run();});
+$("advBox").addEventListener("toggle",save);
+$("resetBtn").addEventListener("click",()=>{ids.forEach(k=>{const e=$(k);if(e.type==="checkbox")e.checked=DEF[k];else e.value=DEF[k];});beamMode="r";userPicked=false;run();});
+const resetPick=new Set(["beamSize","lambda","L","xiCustom","fMin","fMax","fStep","fList","apH","apW","minGap","nMode","nVal","dIn","m2"]);
+ids.forEach(k=>{const e=$(k);if(e.type==="hidden")return;e.addEventListener("input",()=>{if(resetPick.has(k))userPicked=false;run();});});
+
+load();run();
+})();
+</script>
+</body>
+</html>
