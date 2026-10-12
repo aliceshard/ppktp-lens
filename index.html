@@ -199,11 +199,11 @@ tbody tr[aria-selected=true]{background:var(--sel)}
 #printSheet h2{font-size:9.5pt;font-weight:600;margin:0 0 4pt;color:var(--fg)}
 .ps-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12pt;border-bottom:1.2pt solid var(--fg);padding-bottom:5pt;margin-bottom:7pt}
 .ps-eyebrow{font-size:7.5pt;letter-spacing:.06em;color:var(--muted)}
-.ps-meta{font-size:8pt;color:var(--muted);text-align:right;font-family:var(--mono);white-space:nowrap}
+.ps-meta{font-size:8pt;color:var(--muted);text-align:right;font-family:var(--mono);max-width:62mm;flex-shrink:0}
 .ps-grid{display:grid;grid-template-columns:1fr 1fr;gap:6pt;margin-bottom:6pt}
 .ps-box{border:.75pt solid var(--line);border-radius:4pt;padding:5pt 8pt;break-inside:avoid}
 .ps-box dl{display:grid;grid-template-columns:auto 1fr;gap:1.5pt 10pt;margin:0;font-size:8.5pt}
-.ps-box dt{color:var(--muted)}
+.ps-box dt{color:var(--muted);white-space:nowrap}
 .ps-box dd{margin:0;text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 .ps-key{border-color:var(--crystal);background:var(--crystal-soft)}
 .ps-big{display:grid;grid-template-columns:repeat(3,1fr);gap:4pt;margin:2pt 0 6pt}
@@ -215,7 +215,7 @@ tbody tr[aria-selected=true]{background:var(--sel)}
 .ps-stats>div>span{display:block;color:var(--muted);font-size:7pt;white-space:nowrap}
 .ps-stats b{font-family:var(--mono);font-weight:500;font-size:9.5pt;font-variant-numeric:tabular-nums}
 .ps-fig{margin:5pt 0 0;break-inside:avoid}
-.ps-fig>svg{width:100%;height:auto;max-height:36mm;display:block}
+.ps-fig>svg{width:100%;height:auto;max-height:32mm;display:block}
 .ps-fig figcaption{font-size:7pt;color:var(--muted)}
 #printSheet table.ps-table{width:100%;min-width:0;border-collapse:collapse;font-size:8pt;margin-top:2pt}
 #printSheet .ps-table th,#printSheet .ps-table td{padding:2pt 5pt;border-bottom:.5pt solid var(--line);text-align:right;white-space:nowrap}
@@ -231,214 +231,231 @@ tbody tr[aria-selected=true]{background:var(--sel)}
   .wrap{display:none!important}
   #printSheet{display:block}
 }
+/* header tools, lens step toggle, page foot */
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px 20px;flex-wrap:wrap}
+.top>div:first-child{min-width:0;flex:1 1 420px}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.tools .hint,.pagefoot .hint{max-width:22ch;text-align:right}
+.listtools{display:flex;gap:8px 12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:0 14px 8px}
+.listtools label{font-size:.8rem;color:var(--muted);display:flex;gap:5px;align-items:center;cursor:pointer}
+.steprow{display:flex;gap:6px;align-items:center;font-size:.8rem;color:var(--muted)}
+.seg.mini button{padding:3px 9px;font-size:.78rem;font-family:var(--mono)}
+.pagefoot{display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap}
+.reco .eyebrow{text-transform:none;letter-spacing:.02em}
 </style>
 </head>
 <body>
 <div class="wrap">
-<header>
-  <div class="eyebrow">Gaussian beam · type-II PPKTP</div>
-  <h1>PPKTP 집속 렌즈 선택기</h1>
-  <p>빔 크기, 파장, 결정 길이만 넣으면 1단계로 결정 앞 집속 렌즈와 결정 위치를, 2단계로 결정 뒤 평행광 렌즈와 그 위치를 바로 알려 줍니다. 다른 렌즈는 각 단계의 왼쪽 목록에서 고르세요.</p>
+<header class="top">
+  <div>
+    <div class="eyebrow">Gaussian beam · type-II PPKTP</div>
+    <h1 data-i18n="title"></h1>
+    <p data-i18n="intro"></p>
+  </div>
+  <div class="tools">
+    <div class="seg" role="group" aria-label="Language / 언어" id="langSeg">
+      <button type="button" data-lang="ko" lang="ko">한국어</button>
+      <button type="button" data-lang="en" lang="en">English</button>
+    </div>
+    <button type="button" class="btn printBtn" id="printTop" data-i18n="printBtn"></button>
+    <span class="hint printMsg" aria-live="polite"></span>
+  </div>
 </header>
 
-<section class="panel" aria-label="입력">
+<section class="panel" data-i18n-aria="inputsAria">
   <div class="essentials">
     <div class="field">
-      <label for="beamSize">입사 빔 크기 (1/e²)</label>
+      <label for="beamSize" data-i18n="beamSize"></label>
       <div class="row nw">
         <div class="unit"><input type="number" id="beamSize" value="0.665" step="0.001" min="0" inputmode="decimal"><span>mm</span></div>
-        <div class="seg" role="group" aria-label="직경 또는 반경">
-          <button type="button" id="modeR" aria-pressed="true">반경</button>
-          <button type="button" id="modeD" aria-pressed="false">직경</button>
+        <div class="seg" role="group" data-i18n-aria="radiusOrDiam">
+          <button type="button" id="modeR" aria-pressed="true" data-i18n="radius"></button>
+          <button type="button" id="modeD" aria-pressed="false" data-i18n="diameter"></button>
         </div>
       </div>
       <span class="hint mono" id="beamConv"></span>
     </div>
     <div class="field">
-      <label for="lambda">파장 λ</label>
+      <label for="lambda" data-i18n="wavelength"></label>
       <div class="unit"><input type="number" id="lambda" value="404.95805" step="0.001" min="1" inputmode="decimal"><span>nm</span></div>
       <span class="hint" id="nShort"></span>
     </div>
     <div class="field">
-      <label for="L">결정 길이 L</label>
+      <label for="L" data-i18n="crystalL"></label>
       <div class="unit"><input type="number" id="L" value="20" step="1" min="0.1" inputmode="decimal"><span>mm</span></div>
-      <div class="pills" id="Lpresets" aria-label="자주 쓰는 결정 길이">
+      <div class="pills" id="Lpresets" data-i18n-aria="Lpresets">
         <button type="button" data-v="10">10</button><button type="button" data-v="15">15</button><button type="button" data-v="20">20</button><button type="button" data-v="25">25</button><button type="button" data-v="30">30</button>
       </div>
     </div>
     <div class="field">
-      <span class="lbl" id="xiLbl">무엇을 우선할까요? (목표 <span class="tex" data-tex="\xi">ξ</span>)</span>
+      <span class="lbl" id="xiLbl" data-i18n="xiLbl"></span>
       <div class="seg wrap" role="group" aria-labelledby="xiLbl" id="xiSeg">
-        <button type="button" data-v="0.5">순도 0.5</button>
-        <button type="button" data-v="1">공초점 1</button>
-        <button type="button" data-v="2.84">생성률 2.84</button>
-        <button type="button" data-v="custom">직접</button>
+        <button type="button" data-v="0.5" data-i18n="xiPurity"></button>
+        <button type="button" data-v="1" data-i18n="xiConfocal"></button>
+        <button type="button" data-v="2.84" data-i18n="xiRate"></button>
+        <button type="button" data-v="custom" data-i18n="custom"></button>
       </div>
-      <input type="number" id="xiCustom" value="1.5" step="0.1" min="0.01" aria-label="목표 ξ 직접 입력" hidden>
+      <input type="number" id="xiCustom" value="1.5" step="0.1" min="0.01" data-i18n-aria="xiCustomAria" hidden>
       <input type="hidden" id="xiTarget" value="2.84">
     </div>
   </div>
 
   <details class="adv" id="advBox">
-    <summary>고급 설정: 후보 렌즈 목록, 결정 단면, 굴절률, 입사 빔 조건</summary>
+    <summary data-i18n="advSum"></summary>
     <div class="advgrid">
       <div class="field">
-        <span class="lbl" id="lensLbl">후보 렌즈</span>
+        <span class="lbl" id="lensLbl" data-i18n="lensLbl"></span>
         <div class="seg wrap" role="group" aria-labelledby="lensLbl" id="lensSeg">
-          <button type="button" data-v="step">일정 간격</button>
-          <button type="button" data-v="std">시판 표준 f</button>
-          <button type="button" data-v="list">직접 목록</button>
+          <button type="button" data-v="step" data-i18n="lensStep"></button>
+          <button type="button" data-v="std" data-i18n="lensStd"></button>
+          <button type="button" data-v="list" data-i18n="lensList"></button>
         </div>
         <input type="hidden" id="lensMode" value="step">
         <div class="row nw" id="stepBox">
-          <div class="field" style="flex:1"><label for="fMin">최소 f</label><input type="number" id="fMin" value="20" step="10" min="1"></div>
-          <div class="field" style="flex:1"><label for="fMax">최대 f</label><input type="number" id="fMax" value="400" step="10" min="1"></div>
-          <div class="field" style="flex:1"><label for="fStep">간격</label><input type="number" id="fStep" value="20" step="5" min="1"></div>
+          <div class="field" style="flex:1"><label for="fMin" data-i18n="fMin"></label><input type="number" id="fMin" value="20" step="5" min="1"></div>
+          <div class="field" style="flex:1"><label for="fMax" data-i18n="fMax"></label><input type="number" id="fMax" value="400" step="5" min="1"></div>
+          <div class="field" style="flex:1"><label for="fStep" data-i18n="fStep"></label><input type="number" id="fStep" value="20" step="5" min="1"></div>
         </div>
         <div class="field" id="listBox" hidden>
-          <label for="fList">초점거리 목록 (mm, 쉼표로 구분)</label>
+          <label for="fList" data-i18n="fList"></label>
           <input type="text" id="fList" value="50, 75, 100, 150, 200">
         </div>
         <span class="hint" id="stdHint" hidden>25, 30, 35, 40, 50, 60, 75, 100, 125, 150, 175, 200, 250, 300, 400, 500 mm</span>
       </div>
       <div class="field">
-        <span class="lbl">결정 단면 (빔이 지나는 개구)</span>
+        <span class="lbl" data-i18n="aperture"></span>
         <div class="row nw">
-          <div class="unit"><input type="number" id="apH" value="1" step="0.1" min="0.05" aria-label="두께"><span>mm 두께</span></div>
-          <div class="unit"><input type="number" id="apW" value="2" step="0.1" min="0.05" aria-label="폭"><span>mm 폭</span></div>
+          <div class="unit"><input type="number" id="apH" value="1" step="0.1" min="0.05" data-i18n-aria="thickAria"><span data-i18n="mmThick"></span></div>
+          <div class="unit"><input type="number" id="apW" value="2" step="0.1" min="0.05" data-i18n-aria="widthAria"><span data-i18n="mmWide"></span></div>
         </div>
-        <label for="minGap" class="hint" style="margin-top:6px">렌즈와 결정 사이 최소 간격 (앞뒤 공통, 마운트·오븐 공간)</label>
+        <label for="minGap" class="hint" style="margin-top:6px" data-i18n="minGap"></label>
         <div class="unit"><input type="number" id="minGap" value="15" step="1" min="0"><span>mm</span></div>
       </div>
       <div class="field">
-        <label for="nMode">펌프 굴절률 n</label>
+        <label for="nMode" data-i18n="nPump"></label>
         <div class="row nw">
-          <select id="nMode" style="flex:1.3"><option value="auto">KTP n_y 자동</option><option value="manual">직접 입력</option></select>
-          <input type="number" id="nVal" value="1.84" step="0.0001" min="1" style="flex:1" aria-label="굴절률 값">
+          <select id="nMode" style="flex:1.3"><option value="auto" data-i18n="nAuto"></option><option value="manual" data-i18n="manual"></option></select>
+          <input type="number" id="nVal" value="1.84" step="0.0001" min="1" style="flex:1" data-i18n-aria="nValAria">
         </div>
         <span class="hint" id="nHint"></span>
       </div>
       <div class="field">
-        <label for="dIn">입사 허리 → 렌즈 거리 <span class="tex" data-tex="d_\text{in}">d<sub>in</sub></span></label>
+        <label for="dIn" data-i18n="dIn"></label>
         <div class="unit"><input type="number" id="dIn" value="0" step="10"><span>mm</span></div>
-        <span class="hint">콜리메이트된 빔이면 0으로 두세요</span>
-        <label for="m2" style="margin-top:6px">빔 품질 <span class="tex" data-tex="M^2">M²</span></label>
+        <span class="hint" data-i18n="dInHint"></span>
+        <label for="m2" style="margin-top:6px" data-i18n="m2"></label>
         <input type="number" id="m2" value="1" step="0.05" min="1">
       </div>
     </div>
     <div class="row" style="margin-top:12px;justify-content:space-between">
       <span class="err" id="inErr" role="alert"></span>
-      <button type="button" class="btn" id="resetBtn">기본값으로 되돌리기</button>
+      <button type="button" class="btn" id="resetBtn" data-i18n="reset"></button>
     </div>
   </details>
 </section>
 
-<div class="stagehead first"><span class="eyebrow">1단계</span><h2>결정 앞 집속 렌즈</h2></div>
+<div class="stagehead first"><span class="eyebrow" data-i18n="step1"></span><h2 data-i18n="step1Title"></h2></div>
 <section class="panel reco" id="reco" aria-live="polite">
   <div>
-    <div class="eyebrow" id="recoEyebrow">추천</div>
+    <div class="eyebrow" id="recoEyebrow"></div>
     <h2 id="recoTitle"></h2>
     <p id="recoText"></p>
     <div class="alts" id="recoAlts"></div>
   </div>
   <div class="copyrow">
-    <div class="btnrow">
-      <button type="button" class="btn" id="printBtn">A4 요약 인쇄</button>
-      <button type="button" class="btn" id="copyBtn">선택한 렌즈 결과 복사 (1·2단계)</button>
-    </div>
+    <button type="button" class="btn" id="copyBtn" data-i18n="copyBtn"></button>
     <span class="hint" id="copyMsg" aria-live="polite"></span>
   </div>
 </section>
 
 <div class="split">
-  <aside class="panel listpanel" aria-label="후보 렌즈 목록">
-    <div class="listhead">
-      <h2>후보 렌즈 <span class="hint" id="listCount"></span></h2>
-      <label><input type="checkbox" id="onlyOK"> 조건 만족만</label>
+  <aside class="panel listpanel" data-i18n-aria="list1Aria">
+    <div class="listhead"><h2><span data-i18n="list1Title"></span> <span class="hint" id="listCount"></span></h2></div>
+    <div class="listtools">
+      <div class="steprow"><span data-i18n="stepLbl"></span><div class="seg mini stepSeg" role="group" data-i18n-aria="stepAria"><button type="button" data-step="20">20 mm</button><button type="button" data-step="25">25 mm</button></div></div>
+      <label><input type="checkbox" id="onlyOK"> <span data-i18n="onlyOK"></span></label>
     </div>
-    <div class="lcols" aria-hidden="true"><span>f (mm)</span><span><span class="tex" data-tex="w_\text{out}">w<sub>out</sub></span> μm</span><span><span class="tex" data-tex="z_R">z<sub>R</sub></span> mm</span><span><span class="tex" data-tex="\xi">ξ</span> (로그)</span><span></span></div>
-    <div class="list" id="list" role="listbox" aria-label="렌즈 선택. 위아래 화살표로 이동"></div>
-    <div class="listfoot"><span><i style="background:var(--good-bg);border:1px solid var(--good)"></i>ξ 0.75–4 구간</span><span><i style="background:var(--beam)"></i>목표 ξ</span><span><i style="background:var(--warn)"></i>주의</span><span><i style="background:var(--bad)"></i>사용 곤란</span></div>
+    <div class="lcols" aria-hidden="true" data-i18n="lcols1"></div>
+    <div class="list" id="list" role="listbox" data-i18n-aria="listAria"></div>
+    <div class="listfoot" data-i18n="listfoot1"></div>
   </aside>
 
   <section class="panel" id="detail" aria-live="polite" aria-labelledby="detTitle">
     <div class="dethead"><h2 id="detTitle"></h2><span id="detChips"></span></div>
     <div class="stats" id="stats"></div>
     <div class="two">
-      <div><h3>결정 설치 위치 <span class="hint">렌즈 주평면 기준</span></h3><dl class="kv" id="place"></dl></div>
-      <div><h3>결정 치수 확인</h3><dl class="kv" id="req"></dl></div>
+      <div><h3 data-i18n="placeH"></h3><dl class="kv" id="place"></dl></div>
+      <div><h3 data-i18n="reqH"></h3><dl class="kv" id="req"></dl></div>
     </div>
     <figure class="fig">
-      <svg id="svgLayout" viewBox="0 0 900 270" role="img" aria-label="렌즈에서 결정까지의 전체 배치도"></svg>
-      <figcaption>전체 배치도. 가로는 실제 거리 비율이고, 세로(빔 반경, 결정 두께)는 같은 배율로 확대했습니다.</figcaption>
+      <svg id="svgLayout" viewBox="0 0 900 270" role="img" data-i18n-aria="layoutAria"></svg>
+      <figcaption data-i18n="layoutCap"></figcaption>
     </figure>
     <figure class="fig">
-      <svg id="svgZoom" viewBox="0 0 900 270" role="img" aria-label="결정 부근의 빔 반경 확대도. 마우스를 올리면 그 위치의 빔 반경이 표시됩니다"></svg>
-      <figcaption>결정 부근 확대도. 가로는 렌즈로부터 거리(mm), 세로는 빔 반경(μm)이며 보라색 띠는 결정 안 레일리 범위 b = 2<span class="tex" data-tex="z_R">z<sub>R</sub></span>입니다. 그래프 위에 마우스를 올리면 그 위치의 빔 크기를 읽을 수 있습니다.</figcaption>
+      <svg id="svgZoom" viewBox="0 0 900 270" role="img" data-i18n-aria="zoomAria"></svg>
+      <figcaption data-i18n="zoomCap"></figcaption>
     </figure>
-    <div class="legend"><span style="--c:var(--beam)">펌프 빔 (1/e² 반경)</span><span style="--c:var(--crystal)">PPKTP 결정</span></div>
+    <div class="legend" data-i18n="legend1"></div>
   </section>
 </div>
 
 <details class="panel" id="tableBox">
-  <summary>전체 비교표 보기 <span class="hint" id="tbSub"></span></summary>
+  <summary><span data-i18n="tableSum"></span> <span class="hint" id="tbSub"></span></summary>
   <div class="tablewrap">
     <table>
-      <thead><tr>
-        <th scope="col">f (mm)</th><th scope="col"><span class="tex" data-tex="w_\text{out}">w<sub>out</sub></span> (μm)</th><th scope="col"><span class="tex" data-tex="z_R">z<sub>R</sub></span> 공기 (mm)</th><th scope="col"><span class="tex" data-tex="z_R">z<sub>R</sub></span> 결정 (mm)</th><th scope="col"><span class="tex" data-tex="\xi = L/b">ξ = L/b</span></th><th scope="col">허리 <span class="tex" data-tex="d_\text{out}">d<sub>out</sub></span> (mm)</th><th scope="col">결정 앞면 (mm)</th><th scope="col">면 빔 직경 (μm)</th><th scope="col" style="text-align:left">판정</th>
-      </tr></thead>
+      <thead><tr data-i18n="tableHead"></tr></thead>
       <tbody id="tbody"></tbody>
     </table>
   </div>
 </details>
 
-<div class="stagehead s2"><span class="eyebrow">2단계</span><h2>결정 뒤 평행광 렌즈</h2><span class="hint" id="s2ctx"></span></div>
-<section class="panel" aria-label="평행광 렌즈 입력">
+<div class="stagehead s2"><span class="eyebrow" data-i18n="step2"></span><h2 data-i18n="step2Title"></h2><span class="hint" id="s2ctx"></span></div>
+<section class="panel" data-i18n-aria="inputs2Aria">
   <div class="essentials">
     <div class="field">
-      <span class="lbl" id="srcLbl">평행광으로 만들 빛</span>
+      <span class="lbl" id="srcLbl" data-i18n="srcLbl"></span>
       <div class="seg wrap" role="group" aria-labelledby="srcLbl" id="srcSeg">
-        <button type="button" data-v="spdc">SPDC 광자</button>
-        <button type="button" data-v="pump">펌프</button>
+        <button type="button" data-v="spdc" data-i18n="spdc"></button>
+        <button type="button" data-v="pump" data-i18n="pump"></button>
       </div>
       <input type="hidden" id="src" value="spdc">
       <span class="hint" id="srcHint"></span>
     </div>
     <div class="field">
-      <label for="dTarget">목표 평행광 직경 (1/e²)</label>
+      <label for="dTarget" data-i18n="dTarget"></label>
       <div class="unit"><input type="number" id="dTarget" value="1.33" step="0.01" min="0.01" inputmode="decimal"><span>mm</span></div>
-      <div class="pills" id="dPresets" aria-label="자주 쓰는 평행광 직경">
-        <button type="button" data-v="in">입사와 같게</button><button type="button" data-v="0.5">0.5</button><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button>
+      <div class="pills" id="dPresets" data-i18n-aria="dPresetsAria">
+        <button type="button" data-v="in"></button><button type="button" data-v="0.5">0.5</button><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button>
       </div>
     </div>
     <div class="field">
-      <label for="outPos">평행광 허리를 둘 위치 (렌즈 뒤)</label>
-      <div class="unit"><input type="number" id="outPos" value="" placeholder="비우면 f–f 배치" step="10" min="0" inputmode="decimal"><span>mm</span></div>
-      <span class="hint">파이버 커플러까지의 거리처럼 허리를 둘 곳이 정해져 있을 때만 넣으세요.</span>
+      <label for="outPos" data-i18n="outPos"></label>
+      <div class="unit"><input type="number" id="outPos" value="" data-i18n-ph="outPosPh" step="10" min="0" inputmode="decimal"><span>mm</span></div>
+      <span class="hint" data-i18n="outPosHint"></span>
     </div>
   </div>
   <details class="adv" id="adv2">
-    <summary>고급 설정: SPDC 파장, 굴절률, 수집 모드 크기</summary>
+    <summary data-i18n="adv2Sum"></summary>
     <div class="advgrid">
       <div class="field">
-        <label for="lamSMode">SPDC 파장 <span class="tex" data-tex="\lambda_s">λ<sub>s</sub></span></label>
+        <label for="lamSMode" data-i18n="lamSLbl"></label>
         <div class="row nw">
-          <select id="lamSMode" style="flex:1"><option value="auto">2λ (축퇴)</option><option value="manual">직접 입력</option></select>
-          <div class="unit" style="flex:1.2"><input type="number" id="lamS" value="809.9161" step="0.01" aria-label="SPDC 파장 값"><span>nm</span></div>
+          <select id="lamSMode" style="flex:1"><option value="auto" data-i18n="lamSAuto"></option><option value="manual" data-i18n="manual"></option></select>
+          <div class="unit" style="flex:1.2"><input type="number" id="lamS" value="809.9161" step="0.01" data-i18n-aria="lamSAria"><span>nm</span></div>
         </div>
       </div>
       <div class="field">
-        <label for="nSMode">결정 굴절률 <span class="tex" data-tex="n_s">n<sub>s</sub></span> (SPDC 파장)</label>
+        <label for="nSMode" data-i18n="nSLbl"></label>
         <div class="row nw">
-          <select id="nSMode" style="flex:1.3"><option value="auto">KTP n_y 자동</option><option value="manual">직접 입력</option></select>
-          <input type="number" id="nS" value="1.7454" step="0.0001" min="1" style="flex:1" aria-label="SPDC 굴절률 값">
+          <select id="nSMode" style="flex:1.3"><option value="auto" data-i18n="nAuto"></option><option value="manual" data-i18n="manual"></option></select>
+          <input type="number" id="nS" value="1.7559" step="0.0001" min="1" style="flex:1" data-i18n-aria="nSAria">
         </div>
-        <span class="hint">type-II에서는 두 광자의 편광(y, z)에 따라 굴절률이 다릅니다. 데이터시트 값을 넣으면 더 정확합니다.</span>
+        <span class="hint" data-i18n="nSHint"></span>
       </div>
       <div class="field">
-        <label for="modeAssume">SPDC 수집 모드 크기</label>
-        <select id="modeAssume"><option value="sameb">펌프와 같은 b (ξ 동일, 권장)</option><option value="samew">펌프와 같은 허리 반경</option><option value="manual">허리 반경 직접 입력</option></select>
-        <div class="unit" id="wsBox" hidden><input type="number" id="wsManual" value="22" step="0.1" min="0.1" aria-label="SPDC 허리 반경"><span>μm</span></div>
+        <label for="modeAssume" data-i18n="modeLbl"></label>
+        <select id="modeAssume"><option value="sameb" data-i18n="modeSameB"></option><option value="samew" data-i18n="modeSameW"></option><option value="manual" data-i18n="modeManual"></option></select>
+        <div class="unit" id="wsBox" hidden><input type="number" id="wsManual" value="22" step="0.1" min="0.1" data-i18n-aria="wsAria"><span>μm</span></div>
       </div>
     </div>
     <div class="row" style="margin-top:10px"><span class="err" id="in2Err" role="alert"></span></div>
@@ -447,7 +464,7 @@ tbody tr[aria-selected=true]{background:var(--sel)}
 
 <section class="panel reco r2" id="reco2" aria-live="polite">
   <div>
-    <div class="eyebrow" id="reco2Eyebrow">추천</div>
+    <div class="eyebrow" id="reco2Eyebrow"></div>
     <h2 id="reco2Title"></h2>
     <p id="reco2Text"></p>
     <div class="alts" id="reco2Alts"></div>
@@ -455,76 +472,45 @@ tbody tr[aria-selected=true]{background:var(--sel)}
 </section>
 
 <div class="split">
-  <aside class="panel listpanel r2list" aria-label="평행광 렌즈 후보 목록">
-    <div class="listhead">
-      <h2>평행광 렌즈 후보 <span class="hint" id="list2Count"></span></h2>
-      <label><input type="checkbox" id="onlyOK2"> 조건 만족만</label>
+  <aside class="panel listpanel r2list" data-i18n-aria="list2Aria">
+    <div class="listhead"><h2><span data-i18n="list2Title"></span> <span class="hint" id="list2Count"></span></h2></div>
+    <div class="listtools">
+      <div class="steprow"><span data-i18n="stepLbl"></span><div class="seg mini stepSeg" role="group" data-i18n-aria="stepAria"><button type="button" data-step="20">20 mm</button><button type="button" data-step="25">25 mm</button></div></div>
+      <label><input type="checkbox" id="onlyOK2"> <span data-i18n="onlyOK"></span></label>
     </div>
-    <div class="lcols" aria-hidden="true"><span>f (mm)</span><span>결정→렌즈</span><span>발산 mrad</span><span>평행광 직경 mm</span><span></span></div>
-    <div class="list" id="list2" role="listbox" aria-label="평행광 렌즈 선택. 위아래 화살표로 이동"></div>
-    <div class="listfoot"><span><i style="background:var(--good-bg);border:1px solid var(--good)"></i>목표 ±30%</span><span><i style="background:var(--spdc)"></i>목표 직경</span><span><i style="background:var(--warn)"></i>주의</span><span><i style="background:var(--bad)"></i>사용 곤란</span></div>
+    <div class="lcols" aria-hidden="true" data-i18n="lcols2"></div>
+    <div class="list" id="list2" role="listbox" data-i18n-aria="list2BoxAria"></div>
+    <div class="listfoot" data-i18n="listfoot2"></div>
   </aside>
 
   <section class="panel" id="detail2" aria-live="polite" aria-labelledby="det2Title">
     <div class="dethead"><h2 id="det2Title"></h2><span id="det2Chips"></span></div>
     <div class="stats" id="stats2"></div>
     <div class="two">
-      <div><h3>렌즈 설치 위치 <span class="hint">렌즈 주평면 기준</span></h3><dl class="kv" id="place2"></dl></div>
-      <div><h3>빔 정보</h3><dl class="kv" id="beam2"></dl></div>
+      <div><h3 data-i18n="place2H"></h3><dl class="kv" id="place2"></dl></div>
+      <div><h3 data-i18n="beam2H"></h3><dl class="kv" id="beam2"></dl></div>
     </div>
     <figure class="fig">
-      <svg id="svgSystem" viewBox="0 0 900 280" role="img" aria-label="집속 렌즈부터 평행광 렌즈까지 전체 배치도"></svg>
-      <figcaption>전체 배치도. 가로는 실제 거리 비율, 세로(빔 반경, 결정 두께)는 같은 배율로 확대했습니다. 결정 중심부터는 평행광으로 만들 빛을 그렸습니다.</figcaption>
+      <svg id="svgSystem" viewBox="0 0 900 280" role="img" data-i18n-aria="systemAria"></svg>
+      <figcaption data-i18n="systemCap"></figcaption>
     </figure>
     <figure class="fig">
-      <svg id="svgCol" viewBox="0 0 900 250" role="img" aria-label="평행광 렌즈 뒤 거리에 따른 빔 직경"></svg>
-      <figcaption>평행광 렌즈 뒤 거리에 따른 빔 직경(1/e²). 점선은 목표 직경이고, 띠는 출력 허리 주변 <span class="tex" data-tex="\pm z_R^{\prime}">±z<sub>R</sub>′</span> 구간(빔 직경이 허리의 √2배 이내)입니다.</figcaption>
+      <svg id="svgCol" viewBox="0 0 900 250" role="img" data-i18n-aria="colAria"></svg>
+      <figcaption data-i18n="colCap"></figcaption>
     </figure>
-    <div class="legend"><span style="--c:var(--beam)">펌프</span><span style="--c:var(--spdc)">SPDC 광자</span><span style="--c:var(--crystal)">PPKTP 결정</span></div>
+    <div class="legend" data-i18n="legend2"></div>
   </section>
 </div>
 
 <details class="panel note">
-  <summary>계산 방법과 가정</summary>
-  <p><b>집속 허리</b> (Self의 가우시안 빔 렌즈 공식, 얇은 렌즈). 입사 허리가 렌즈 앞 <span class="tex" data-tex="d_\text{in}">d<sub>in</sub></span>에 있을 때:</p>
-  <div class="eqs">
-    <div class="tex disp" data-tex="w_\text{out} = \frac{w_\text{in}\, f}{\sqrt{(d_\text{in}-f)^2 + z_{R,\text{in}}^2}}">w_out = w_in·f / √((d_in−f)² + z_R,in²)</div>
-    <div class="tex disp" data-tex="d_\text{out} = f + \frac{(d_\text{in}-f)\,f^2}{(d_\text{in}-f)^2 + z_{R,\text{in}}^2}">d_out = f + (d_in−f)·f² / ((d_in−f)² + z_R,in²)</div>
-  </div>
-  <p><b>레일리 길이와 근사식.</b> 근사식과의 차이는 상세 정보에 표시합니다.</p>
-  <div class="eqs">
-    <div class="tex disp" data-tex="z_{R,\text{in}} = \frac{\pi w_\text{in}^2}{M^2 \lambda}">z_R,in = π·w_in² / (M²λ)</div>
-    <div class="tex disp" data-tex="z_R = \frac{\pi w_\text{out}^2}{M^2 \lambda}">z_R = π·w_out² / (M²λ)</div>
-    <div class="tex disp" data-tex="w_\text{out} \approx \frac{M^2 f \lambda}{\pi w_\text{in}} \quad (z_{R,\text{in}} \gg f)">w_out ≈ M²fλ / (π·w_in)</div>
-  </div>
-  <p><b>결정 안.</b> 레일리 길이가 n배 늘어나고, 길이 L인 결정은 공기 L/n과 같아서 허리가 Δz만큼 뒤로 밀립니다. 그래서 허리를 결정 중심에 두려면 앞면을 <span class="tex" data-tex="z_\text{front}">z<sub>front</sub></span>에 놓습니다.</p>
-  <div class="eqs">
-    <div class="tex disp" data-tex="z_R^\text{KTP} = n\, z_R, \qquad b = 2 z_R^\text{KTP}, \qquad \xi = \frac{L}{b}">z_R(KTP) = n·z_R,  b = 2·z_R(KTP),  ξ = L/b</div>
-    <div class="tex disp" data-tex="z_\text{front} = d_\text{out} - \frac{L}{2n}, \qquad \Delta z = \frac{L}{2}\left(1 - \frac{1}{n}\right)">z_front = d_out − L/(2n),  Δz = (L/2)(1 − 1/n)</div>
-    <div class="tex disp" data-tex="w_\text{face} = w_\text{out}\sqrt{1+\xi^2}">w_face = w_out·√(1+ξ²)</div>
-  </div>
-  <p><b>개구 투과율.</b> 결정 두께 t, 폭 W 방향의 가우시안 클리핑으로 계산해 99.5% 미만이면 경고합니다.</p>
-  <div class="eqs">
-    <div class="tex disp" data-tex="T = \operatorname{erf}\!\left(\frac{\sqrt{2}\,(t/2)}{w_\text{face}}\right) \operatorname{erf}\!\left(\frac{\sqrt{2}\,(W/2)}{w_\text{face}}\right)">T = erf(√2·(t/2)/w_face) · erf(√2·(W/2)/w_face)</div>
-  </div>
-  <p><b>ξ 고르기.</b> <span class="tex" data-tex="\xi \approx 2.84">ξ ≈ 2.84</span>는 Boyd–Kleinman 최적(SHG, SPDC 쌍 생성률 최대)이고, <span class="tex" data-tex="\xi \lesssim 1">ξ ≲ 1</span>은 단일모드 수집 효율과 스펙트럼 순도에 유리하다고 알려져 있습니다. 추천 렌즈는 개구와 간격 조건을 만족하는 렌즈 중 <span class="tex" data-tex="\left|\ln(\xi/\xi_\text{target})\right|">|ln(ξ/ξ_target)|</span>가 가장 작은 것입니다. 근사식 오차가 1%를 넘으면 표시합니다.</p>
-  <p><b>굴절률 자동값.</b> KTP <span class="tex" data-tex="n_y">n<sub>y</sub></span> Sellmeier 식(Kato &amp; Takaoka, Appl. Opt. 41, 5040, 2002; 유효 범위 0.43–3.54 μm)입니다. 405 nm는 범위 밖 외삽이므로 결정 데이터시트 값이 있으면 직접 입력하세요.</p>
-  <div class="eqs">
-    <div class="tex disp" data-tex="n_y^2 = 3.45018 + \frac{0.04341}{\lambda^2 - 0.04597} + \frac{16.98825}{\lambda^2 - 39.43799} \quad (\lambda\ \text{in}\ \mu\text{m})">n_y² = 3.45018 + 0.04341/(λ² − 0.04597) + 16.98825/(λ² − 39.43799)</div>
-  </div>
-  <p><b>2단계, 평행광 렌즈.</b> 결정 밖에서 보면 허리는 결정 뒷면에서 <span class="tex" data-tex="L/(2n_s)">L/(2n_s)</span>만큼 안쪽에 있는 것처럼 보입니다(겉보기 허리). 이 겉보기 허리에서 렌즈 2까지의 거리를 <span class="tex" data-tex="d_2 = f_2 + x">d₂ = f₂ + x</span>로 두면 Self 공식이 그대로 적용됩니다. 기본값은 <span class="tex" data-tex="x = 0">x = 0</span>(f–f 배치)이며, 이때 출력 허리는 렌즈 뒤 정확히 <span class="tex" data-tex="f_2">f₂</span>에 생깁니다.</p>
-  <div class="eqs">
-    <div class="tex disp" data-tex="z_\text{app} = z_\text{back} - \frac{L}{2 n_s}, \qquad z_R = \frac{\pi w_0^2}{M^2 \lambda}">z_app = z_back − L/(2n_s),  z_R = π·w0²/(M²λ)</div>
-    <div class="tex disp" data-tex="w^{\prime} = \frac{w_0 f_2}{\sqrt{x^2 + z_R^2}} \;\xrightarrow{\,x=0\,}\; \frac{M^2 f_2 \lambda}{\pi w_0}, \qquad z_R^{\prime} = \frac{\pi w^{\prime 2}}{M^2\lambda} = \frac{f_2^2}{z_R}">w′ = w0·f2/√(x²+z_R²) → M²f2λ/(πw0),  z_R′ = f2²/z_R</div>
-    <div class="tex disp" data-tex="\theta = \frac{M^2 \lambda}{\pi w^{\prime}}, \qquad f_2^\text{ideal} = \frac{\pi w_0\, w^{\prime}_\text{target}}{M^2 \lambda}">θ = M²λ/(πw′),  f2 = π·w0·w′_target/(M²λ)</div>
-  </div>
-  <p>평행광 허리를 렌즈 뒤 거리 D에 두려면 <span class="tex" data-tex="(D-f_2)(x^2+z_R^2) = f_2^2 x">(D−f₂)(x²+z_R²) = f₂²x</span>의 작은 근을 씁니다. 이 근은 <span class="tex" data-tex="|D-f_2| \le f_2^2/(2 z_R)">|D−f₂| ≤ f₂²/(2z_R)</span>일 때만 있습니다. 렌즈 위치 오차 x는 출력 허리를 <span class="tex" data-tex="(f_2/z_R)^2\, x">(f₂/z_R)²·x</span>만큼 옮기므로, <span class="tex" data-tex="|x| \lesssim z_R">|x| ≲ z_R</span>이면 출력 허리가 <span class="tex" data-tex="z_R^{\prime}">z_R′</span> 안에서 움직입니다. 이 값을 렌즈 위치 허용 범위로 표시합니다.</p>
-  <p><b>SPDC 수집 모드.</b> 축퇴 type-II SPDC(<span class="tex" data-tex="\lambda_s = \lambda_i = 2\lambda_p">λ_s = λ_i = 2λ_p</span>)에서 수집 모드가 펌프와 같은 공초점 파라미터 b를 가진다고 가정하면 허리 반경은 다음과 같습니다. 고급 설정에서 다른 가정으로 바꿀 수 있습니다.</p>
-  <div class="eqs">
-    <div class="tex disp" data-tex="w_s = w_p \sqrt{\frac{\lambda_s\, n_p}{\lambda_p\, n_s}} \qquad \left(\frac{2\pi n_s w_s^2}{\lambda_s} = \frac{2\pi n_p w_p^2}{\lambda_p}\right)">w_s = w_p·√(λ_s·n_p / (λ_p·n_s))</div>
-  </div>
-  <p><b>한계.</b> 거리는 얇은 렌즈의 주평면 기준입니다. 평볼록 렌즈는 주평면이 곡면 쪽 꼭짓점 근처에 있으니 마운트 위치를 보정하세요. 결정 면의 반사, 열 렌즈, 비대칭 빔은 고려하지 않았습니다.</p>
+  <summary data-i18n="notesSum"></summary>
+  <div data-i18n="notesBody"></div>
 </details>
+
+<div class="pagefoot">
+  <span class="hint printMsg" aria-live="polite"></span>
+  <button type="button" class="btn printBtn" id="printBottom" data-i18n="printBtn"></button>
+</div>
 </div>
 
 <section id="printSheet" aria-hidden="true"></section>
@@ -537,13 +523,288 @@ window.MathJax={tex:{inlineMath:[],displayMath:[]},svg:{fontCache:"none"},option
 <script>
 (function(){
 const $=id=>document.getElementById(id);
+const R=String.raw;
+function tx(tex,fb){return `<span class="tex" data-tex="${tex}">${fb}</span>`;}
+function eq(tex,fb){return `<div class="tex disp" data-tex="${tex}">${fb}</div>`;}
+const SYM={
+  wout:tx(R`w_\text{out}`,"w<sub>out</sub>"), win:tx(R`w_\text{in}`,"w<sub>in</sub>"),
+  din:tx(R`d_\text{in}`,"d<sub>in</sub>"), dout:tx(R`d_\text{out}`,"d<sub>out</sub>"),
+  zR:tx(R`z_R`,"z<sub>R</sub>"), zRK:tx(R`z_R^\text{KTP}`,"z<sub>R</sub><sup>KTP</sup>"), zRp:tx(R`z_R^{\prime}`,"z<sub>R</sub>′"),
+  xi:tx(R`\xi`,"ξ"), xiLb:tx(R`\xi = L/b`,"ξ = L/b"), M2:tx(R`M^2`,"M²"), lamS:tx(R`\lambda_s`,"λ<sub>s</sub>"),
+  nS:tx(R`n_s`,"n<sub>s</sub>"), ny:tx(R`n_y`,"n<sub>y</sub>"), dz:tx(R`\Delta z`,"Δz"), wp:tx(R`w^{\prime}`,"w′"),
+  th:tx(R`\theta`,"θ"), w0:tx(R`w_0`,"w₀"), d2:tx(R`d_2`,"d₂"), f2:tx(R`f_2`,"f₂"), zfront:tx(R`z_\text{front}`,"z<sub>front</sub>"),
+  approx:tx(R`f\lambda/\pi w_\text{in}`,"fλ/πw<sub>in</sub>"), ap3:tx(R`\approx 3\,w_\text{face}`,"≈ 3w"),
+  xi1:tx(R`\xi = 1`,"ξ = 1"), xi284:tx(R`\xi = 2.84`,"ξ = 2.84"), xi1284:tx(R`\xi = 1,\ 2.84`,"ξ = 1, 2.84"),
+  pmzRp:tx(R`\pm z_R^{\prime}`,"±z<sub>R</sub>′"), xiBK:tx(R`\xi \approx 2.84`,"ξ ≈ 2.84"), xiLe1:tx(R`\xi \lesssim 1`,"ξ ≲ 1"),
+  lnxi:tx(R`\left|\ln(\xi/\xi_\text{target})\right|`,"|ln(ξ/ξ_target)|"), L2n:tx(R`L/(2n_s)`,"L/(2n_s)"),
+  d2x:tx(R`d_2 = f_2 + x`,"d₂ = f₂ + x"), x0:tx(R`x = 0`,"x = 0"),
+  quad:tx(R`(D-f_2)(x^2+z_R^2) = f_2^2 x`,"(D−f₂)(x²+z_R²) = f₂²x"), reach:tx(R`|D-f_2| \le f_2^2/(2 z_R)`,"|D−f₂| ≤ f₂²/(2z_R)"),
+  shift:tx(R`(f_2/z_R)^2\, x`,"(f₂/z_R)²·x"), tol:tx(R`|x| \lesssim z_R`,"|x| ≲ z_R"), degen:tx(R`\lambda_s = \lambda_i = 2\lambda_p`,"λ_s = λ_i = 2λ_p")
+};
+const EQ={
+  wout:eq(R`w_\text{out} = \frac{w_\text{in}\, f}{\sqrt{(d_\text{in}-f)^2 + z_{R,\text{in}}^2}}`,"w_out = w_in·f / √((d_in−f)² + z_R,in²)"),
+  dout:eq(R`d_\text{out} = f + \frac{(d_\text{in}-f)\,f^2}{(d_\text{in}-f)^2 + z_{R,\text{in}}^2}`,"d_out = f + (d_in−f)·f² / ((d_in−f)² + z_R,in²)"),
+  zRin:eq(R`z_{R,\text{in}} = \frac{\pi w_\text{in}^2}{M^2 \lambda}`,"z_R,in = π·w_in² / (M²λ)"),
+  zR:eq(R`z_R = \frac{\pi w_\text{out}^2}{M^2 \lambda}`,"z_R = π·w_out² / (M²λ)"),
+  approx:eq(R`w_\text{out} \approx \frac{M^2 f \lambda}{\pi w_\text{in}} \quad (z_{R,\text{in}} \gg f)`,"w_out ≈ M²fλ / (π·w_in)"),
+  xi:eq(R`z_R^\text{KTP} = n\, z_R, \qquad b = 2 z_R^\text{KTP}, \qquad \xi = \frac{L}{b}`,"z_R(KTP) = n·z_R,  b = 2·z_R(KTP),  ξ = L/b"),
+  front:eq(R`z_\text{front} = d_\text{out} - \frac{L}{2n}, \qquad \Delta z = \frac{L}{2}\left(1 - \frac{1}{n}\right)`,"z_front = d_out − L/(2n),  Δz = (L/2)(1 − 1/n)"),
+  face:eq(R`w_\text{face} = w_\text{out}\sqrt{1+\xi^2}`,"w_face = w_out·√(1+ξ²)"),
+  T:eq(R`T = \operatorname{erf}\!\left(\frac{\sqrt{2}\,(t/2)}{w_\text{face}}\right) \operatorname{erf}\!\left(\frac{\sqrt{2}\,(W/2)}{w_\text{face}}\right)`,"T = erf(√2·(t/2)/w_face) · erf(√2·(W/2)/w_face)"),
+  sell:eq(R`n_y^2 = 3.45018 + \frac{0.04341}{\lambda^2 - 0.04597} + \frac{16.98825}{\lambda^2 - 39.43799} \quad (\lambda\ \text{in}\ \mu\text{m})`,"n_y² = 3.45018 + 0.04341/(λ² − 0.04597) + 16.98825/(λ² − 39.43799)"),
+  app:eq(R`z_\text{app} = z_\text{back} - \frac{L}{2 n_s}, \qquad z_R = \frac{\pi w_0^2}{M^2 \lambda}`,"z_app = z_back − L/(2n_s),  z_R = π·w0²/(M²λ)"),
+  wp:eq(R`w^{\prime} = \frac{w_0 f_2}{\sqrt{x^2 + z_R^2}} \;\xrightarrow{\,x=0\,}\; \frac{M^2 f_2 \lambda}{\pi w_0}, \qquad z_R^{\prime} = \frac{\pi w^{\prime 2}}{M^2\lambda} = \frac{f_2^2}{z_R}`,"w′ = w0·f2/√(x²+z_R²) → M²f2λ/(πw0),  z_R′ = f2²/z_R"),
+  theta:eq(R`\theta = \frac{M^2 \lambda}{\pi w^{\prime}}, \qquad f_2^\text{ideal} = \frac{\pi w_0\, w^{\prime}_\text{target}}{M^2 \lambda}`,"θ = M²λ/(πw′),  f2 = π·w0·w′_target/(M²λ)"),
+  ws:eq(R`w_s = w_p \sqrt{\frac{\lambda_s\, n_p}{\lambda_p\, n_s}} \qquad \left(\frac{2\pi n_s w_s^2}{\lambda_s} = \frac{2\pi n_p w_p^2}{\lambda_p}\right)`,"w_s = w_p·√(λ_s·n_p / (λ_p·n_s))"),
+  psXi:eq(R`\xi = \frac{L}{2 n z_R}, \quad z_\text{front} = d_\text{out} - \frac{L}{2n}`,"ξ = L/(2n·z_R),  z_front = d_out − L/(2n)"),
+  psWs:eq(R`w_s = w_p\sqrt{\frac{\lambda_s n_p}{\lambda_p n_s}}`,"w_s = w_p·√(λ_s n_p/(λ_p n_s))")
+};
+const box=(c,t,extra)=>`<span><i style="background:${c};${extra||""}"></i>${t}</span>`;
+
+const STR={ko:{
+  docTitle:"PPKTP 집속 렌즈 선택기", title:"PPKTP 집속 렌즈 선택기",
+  intro:"빔 크기, 파장, 결정 길이만 넣으면 1단계로 결정 앞 집속 렌즈와 결정 위치를, 2단계로 결정 뒤 평행광 렌즈와 그 위치를 알려 줍니다. 각 단계의 왼쪽 목록에서 다른 렌즈를 고를 수 있고, 인쇄는 고른 렌즈 기준으로 나옵니다.",
+  printBtn:"A4 요약 인쇄", printErr:"입력값을 먼저 확인하세요", inputsAria:"입력",
+  beamSize:"입사 빔 크기 (1/e²)", radiusOrDiam:"직경 또는 반경", radius:"반경", diameter:"직경",
+  beamConvR:v=>`직경 2w = ${v} mm`, beamConvD:v=>`반경 w = ${v} mm`,
+  wavelength:"파장 λ", nShort:(n,a)=>`결정 굴절률 n = ${n}${a?" (자동, 고급 설정에서 변경)":""}`,
+  crystalL:"결정 길이 L", Lpresets:"자주 쓰는 결정 길이",
+  xiLbl:`무엇을 우선할까요? (목표 ${SYM.xi})`, xiPurity:"순도 0.5", xiConfocal:"공초점 1", xiRate:"생성률 2.84", custom:"직접", xiCustomAria:"목표 ξ 직접 입력",
+  advSum:"고급 설정: 후보 렌즈 목록, 결정 단면, 굴절률, 입사 빔 조건",
+  lensLbl:"후보 렌즈", lensStep:"일정 간격", lensStd:"시판 표준 f", lensList:"직접 목록", fMin:"최소 f", fMax:"최대 f", fStep:"간격",
+  fList:"초점거리 목록 (mm, 쉼표로 구분)", aperture:"결정 단면 (빔이 지나는 개구)", thickAria:"두께", widthAria:"폭", mmThick:"mm 두께", mmWide:"mm 폭",
+  minGap:"렌즈와 결정 사이 최소 간격 (앞뒤 공통, 마운트·오븐 공간)", nPump:"펌프 굴절률 n", nAuto:"KTP n_y 자동", manual:"직접 입력", nValAria:"굴절률 값",
+  nHintOut:"Sellmeier 유효 범위(0.43–3.54 μm) 밖 외삽값입니다. 데이터시트 값이 있으면 직접 입력하세요.", nHintIn:"Kato & Takaoka 2002 Sellmeier 식", nHintManual:"펌프 편광 방향의 굴절률을 넣으세요.",
+  dIn:`입사 허리 → 렌즈 거리 ${SYM.din}`, dInHint:"콜리메이트된 빔이면 0으로 두세요", m2:`빔 품질 ${SYM.M2}`, reset:"기본값으로 되돌리기",
+  eBeam:"빔 크기를 0보다 큰 값으로 입력하세요.", eLam:"파장을 0보다 큰 값으로 입력하세요.", eL:"결정 길이를 0보다 크게 입력하세요.", eXi:"목표 ξ를 0보다 크게 입력하세요.",
+  eAp:"결정 단면 치수를 0보다 크게 입력하세요.", eN:"굴절률은 1 이상이어야 합니다.", eM2:"M²는 1 이상이어야 합니다.", eLens:"후보 렌즈가 없습니다. 고급 설정에서 렌즈 범위나 목록을 확인하세요.",
+  inputCheck:"입력 확인",
+  step1:"1단계", step1Title:"결정 앞 집속 렌즈", copyBtn:"선택한 렌즈 결과 복사 (1·2단계)", copied:"복사했습니다", copyBlocked:"복사가 막혀 있습니다. 상세 정보를 직접 선택해 주세요",
+  goal:{"0.5":"순도 우선","1":"공초점","2.84":"생성률 최대"}, goalCustom:"직접 지정",
+  noneOk:"조건을 모두 만족하는 렌즈가 없습니다", closest:f=>`가장 가까운 후보는 <span class="mono">f = ${f} mm</span>`, notMet:"조건 미충족",
+  noneOkHint1:"고급 설정에서 최소 간격, 결정 단면, 후보 렌즈 범위를 바꿔 보세요.",
+  reco1Eyebrow:(x,g)=>`집속 렌즈 추천 · 목표 ξ = ${x} (${g})`,
+  reco1Title:(f,front)=>`<span class="mono">f = ${f} mm</span> 렌즈, 결정 앞면을 렌즈에서 <span class="mono">${front} mm</span>에`,
+  reco1Text:(c,w,z,xi,off)=>`결정 중심(허리)은 <span class="mono">${c} mm</span>, 집속 허리 반경 <span class="mono">${w} μm</span>, 결정 안 레일리 길이 <span class="mono">${z} mm</span>, ξ = <span class="mono">${xi}</span>${off?`. 후보 렌즈 간격이 넓어 목표보다 ${off>1?"강하게":"약하게"} 집속됩니다`:""}.`,
+  neighbours:"이웃 렌즈", backToBest:"추천 렌즈로 돌아가기",
+  list1Aria:"후보 렌즈 목록", list1Title:"후보 렌즈", count:(n,tot)=>`${n}${tot?` / ${tot}`:""}개`, onlyOK:"조건 만족만", stepLbl:"간격", stepAria:"후보 렌즈 간격",
+  lcols1:`<span>f (mm)</span><span>${SYM.wout} μm</span><span>${SYM.zR} mm</span><span>${SYM.xi} (로그)</span><span></span>`,
+  listAria:"렌즈 선택. 위아래 화살표로 이동",
+  listfoot1:box("var(--good-bg)","ξ 0.75–4 구간","border:1px solid var(--good)")+box("var(--beam)","목표 ξ")+box("var(--warn)","주의")+box("var(--bad)","사용 곤란"),
+  recommended:"추천",
+  xiCls:["매우 약한 집속","약한 집속","공초점 근처","BK 최적 근처","강한 집속","과집속"],
+  pOverlapLens:"렌즈와 겹침", pGap:"간격 부족", pClip:v=>`개구 클리핑 ${v}%`, pApprox:v=>`근사식 오차 ${v}%`,
+  det1Title:f=>`f = ${f} mm 렌즈`, chipBest:"★ 추천",
+  sWout:`집속 허리 반경 ${SYM.wout}`, sWoutSub:v=>`직경 ${v} μm`, sZR:`레일리 길이 ${SYM.zR} (공기)`, sZRK:`${SYM.zRK} (결정 안)`,
+  sXi:`집속 파라미터 ${SYM.xiLb}`, sXiSub:v=>`목표 ${v}`, sApprox:`근사식 ${SYM.approx}`, sApproxSub:v=>`오차 ${v}%`,
+  placeH:`결정 설치 위치 <span class="hint">렌즈 주평면 기준</span>`, reqH:"결정 치수 확인",
+  pFront:"결정 앞면", pCenter:"결정 중심 (허리)", pBack:"결정 뒷면", pF:"렌즈 초점 F", pDout:`결정이 없을 때 허리 ${SYM.dout}`, pShift:`결정 때문에 허리가 밀리는 거리 ${SYM.dz}`,
+  rL1:`이 렌즈로 ${SYM.xi1}이 되는 결정 길이`, rL284:`이 렌즈로 ${SYM.xi284}가 되는 결정 길이`, rFace:"결정 면에서 빔 직경", rAp:`권장 최소 개구 ${SYM.ap3}`,
+  rT:(h,w)=>`${h} × ${w} mm 개구 투과율`, rLens:"렌즈 위치의 빔 직경",
+  layoutAria:"렌즈에서 결정까지의 전체 배치도", layoutCap:"전체 배치도. 가로는 실제 거리 비율이고, 세로(빔 반경, 결정 두께)는 같은 배율로 확대했습니다.",
+  zoomAria:"결정 부근의 빔 반경 확대도. 마우스를 올리면 그 위치의 빔 반경이 표시됩니다",
+  zoomCap:`결정 부근 확대도. 가로는 렌즈로부터 거리(mm), 세로는 빔 반경(μm)이며 보라색 띠는 결정 안 레일리 범위 b = 2${SYM.zR}입니다. 그래프 위에 마우스를 올리면 그 위치의 빔 크기를 읽을 수 있습니다.`,
+  legend1:`<span style="--c:var(--beam)">펌프 빔 (1/e² 반경)</span><span style="--c:var(--crystal)">PPKTP 결정</span>`,
+  svLens:f=>`렌즈 f = ${f} mm`, svFocus:"| 초점 F", svNoCrystal:"○ 결정 없을 때 허리", svInput:v=>`입사 2w = ${v} mm`,
+  svToFront:v=>`앞면까지 ${v} mm`, svToCenter:v=>`결정 중심(허리)까지 ${v} mm`, svFace:v=>`면 2w = ${v} μm`, svOff:v=>`결정 두께 ±${v} mm (화면 밖)`, svInCrystal:" · 결정 안",
+  tableSum:"전체 비교표 보기", tbSub:(n,L,nn)=>`· ${n}개 렌즈, L = ${L} mm, n = ${nn}`,
+  tableHead:`<th scope="col">f (mm)</th><th scope="col">${SYM.wout} (μm)</th><th scope="col">${SYM.zR} 공기 (mm)</th><th scope="col">${SYM.zR} 결정 (mm)</th><th scope="col">${SYM.xiLb}</th><th scope="col">허리 ${SYM.dout} (mm)</th><th scope="col">결정 앞면 (mm)</th><th scope="col">면 빔 직경 (μm)</th><th scope="col" style="text-align:left">판정</th>`,
+  step2:"2단계", step2Title:"결정 뒤 평행광 렌즈", s2ctx:f=>`1단계에서 고른 f = ${f} mm 집속 렌즈 기준`, inputs2Aria:"평행광 렌즈 입력",
+  srcLbl:"평행광으로 만들 빛", spdc:"SPDC 광자", pump:"펌프",
+  srcHintS:(l,w,a)=>`λ<sub>s</sub> = ${l} nm, 결정 안 허리 반경 ${w} μm (${a})`, srcHintP:(l,w)=>`λ = ${l} nm, 결정 안 허리 반경 ${w} μm`,
+  assume:{sameb:"펌프와 같은 b",samew:"펌프와 같은 허리",manual:"직접 입력"},
+  dTarget:"목표 평행광 직경 (1/e²)", dPresetsAria:"자주 쓰는 평행광 직경", dIn:v=>`입사와 같게 (${v})`,
+  outPos:"평행광 허리를 둘 위치 (렌즈 뒤)", outPosPh:"비우면 f–f 배치", outPosHint:"파이버 커플러까지의 거리처럼 허리를 둘 곳이 정해져 있을 때만 넣으세요.",
+  adv2Sum:"고급 설정: SPDC 파장, 굴절률, 수집 모드 크기", lamSLbl:`SPDC 파장 ${SYM.lamS}`, lamSAuto:"2λ (축퇴)", lamSAria:"SPDC 파장 값",
+  nSLbl:`결정 굴절률 ${SYM.nS} (SPDC 파장)`, nSAria:"SPDC 굴절률 값", nSHint:"type-II에서는 두 광자의 편광(y, z)에 따라 굴절률이 다릅니다. 데이터시트 값을 넣으면 더 정확합니다.",
+  modeLbl:"SPDC 수집 모드 크기", modeSameB:"펌프와 같은 b (ξ 동일, 권장)", modeSameW:"펌프와 같은 허리 반경", modeManual:"허리 반경 직접 입력", wsAria:"SPDC 허리 반경",
+  e2D:"목표 평행광 직경을 0보다 크게 입력하세요.", e2Pos:"평행광 허리 위치는 비우거나 0보다 큰 값을 넣으세요.", e2Lam:"SPDC 파장을 0보다 크게 입력하세요.", e2N:"SPDC 굴절률은 1 이상이어야 합니다.", e2W:"SPDC 허리 반경을 0보다 크게 입력하세요.",
+  noneOk2Hint:"1단계 고급 설정의 최소 간격이나 후보 렌즈 범위, 평행광 허리 위치를 바꿔 보세요.",
+  reco2Eyebrow:(n,d)=>`평행광 렌즈 추천 · ${n} · 목표 직경 ${d} mm`,
+  reco2Title:(f,g)=>`<span class="mono">f = ${f} mm</span> 렌즈를 결정 뒷면에서 <span class="mono">${g} mm</span>에`,
+  reco2Text:(z2,d,th,zr,tol,outW,off)=>`집속 렌즈에서 <span class="mono">${z2} mm</span> 위치입니다. 평행광 직경 <span class="mono">${d} mm</span>, 발산 반각 <span class="mono">${th} mrad</span>, 평행 유지 거리 ${SYM.zRp} = <span class="mono">${zr}</span>, 렌즈 위치 허용 <span class="mono">±${tol} mm</span>${outW?`, 출력 허리는 렌즈 뒤 <span class="mono">${outW} mm</span>`:""}${off?`. 후보 간격이 넓어 목표보다 ${off>1?"큽니다":"작습니다"}`:""}.`,
+  list2Aria:"평행광 렌즈 후보 목록", list2Title:"평행광 렌즈 후보", list2BoxAria:"평행광 렌즈 선택. 위아래 화살표로 이동",
+  lcols2:`<span>f (mm)</span><span>결정→렌즈</span><span>발산 mrad</span><span>평행광 직경 mm</span><span></span>`,
+  listfoot2:box("var(--good-bg)","목표 ±30%","border:1px solid var(--good)")+box("var(--spdc)","목표 직경")+box("var(--warn)","주의")+box("var(--bad)","사용 곤란"),
+  p2Overlap:"결정과 겹침", p2Reach:"허리 위치 도달 불가", fitBig:"목표보다 큼", fitSmall:"목표보다 작음", fitOk:"목표 근처",
+  det2Title:f=>`f = ${f} mm 평행광 렌즈`,
+  s2D:`평행광 직경 2${SYM.wp}`, s2DSub:v=>`목표 ${v} mm`, s2Th:`발산 반각 ${SYM.th}`, s2ThSub:v=>`1 m 뒤 직경 ${v} mm`,
+  s2ZR:`평행 유지 거리 ${SYM.zRp}`, s2ZRSub:v=>`출력 허리: 렌즈 뒤 ${v} mm`, s2Gap:"결정 뒷면 → 렌즈", s2GapSub:v=>`집속 렌즈에서 ${v} mm`,
+  s2Tol:"렌즈 위치 허용", s2TolSub:`겉보기 허리의 ${SYM.zR}`,
+  place2H:`렌즈 설치 위치 <span class="hint">렌즈 주평면 기준</span>`, beam2H:"빔 정보",
+  q1:"집속 렌즈에서 평행광 렌즈까지", q2:"결정 뒷면에서 평행광 렌즈까지", q3:`겉보기 허리에서 렌즈까지 ${SYM.d2}`, q4:"겉보기 허리 위치 (집속 렌즈 기준)", q5:"출력 허리 위치 (평행광 렌즈 뒤)", q6:"렌즈 위치 허용 범위",
+  b1:"평행광으로 만들 빛", b2:`결정 안 허리 반경 ${SYM.w0}`, b3:`공기 중 레일리 길이 ${SYM.zR}`, b4:"평행광 렌즈 위치의 빔 직경", b5:"이 빛으로 목표 직경을 주는 이상적 f", b6:"결정 굴절률 (이 빛)",
+  systemAria:"집속 렌즈부터 평행광 렌즈까지 전체 배치도", systemCap:"전체 배치도. 가로는 실제 거리 비율, 세로(빔 반경, 결정 두께)는 같은 배율로 확대했습니다. 결정 중심부터는 평행광으로 만들 빛을 그렸습니다.",
+  colAria:"평행광 렌즈 뒤 거리에 따른 빔 직경", colCap:`평행광 렌즈 뒤 거리에 따른 빔 직경(1/e²). 점선은 목표 직경이고, 띠는 출력 허리 주변 ${SYM.pmzRp} 구간(빔 직경이 허리의 √2배 이내)입니다.`,
+  legend2:`<span style="--c:var(--beam)">펌프</span><span style="--c:var(--spdc)">SPDC 광자</span><span style="--c:var(--crystal)">PPKTP 결정</span>`,
+  svL1:f=>`집속 렌즈 f = ${f} mm`, svL2:f=>`평행광 렌즈 f = ${f} mm`, svFront2:v=>`결정 앞면 ${v} mm`, svGap2:v=>`결정 뒷면→렌즈 ${v} mm`, svTotal:v=>`집속 렌즈→평행광 렌즈 ${v} mm`,
+  svTarget:v=>`목표 ${v} mm`, svOutWaist:"출력 허리", svColAxis:"평행광 렌즈 뒤 거리 (mm)",
+  copyHead:(lam,w,L,n,m2)=>`PPKTP 집속 계산: λ = ${lam} nm, w_in = ${w} mm (반경, 1/e²), L = ${L} mm, n = ${n}, M² = ${m2}`,
+  copyL1:(f,w,za,zc,b,xi)=>`집속 렌즈 f = ${f} mm: w_out = ${w} μm, z_R(공기) = ${za} mm, z_R(결정) = ${zc} mm, b = ${b} mm, ξ = ${xi}`,
+  copyPos:(a,b,c)=>`결정 위치(렌즈 주평면 기준): 앞면 ${a} mm, 중심 ${b} mm, 뒷면 ${c} mm`,
+  copyFace:(d,h,w,T)=>`결정 면 빔 직경 ${d} μm, 개구 ${h}×${w} mm 투과율 ${T}%`,
+  copyL2:(nm,l,w0,f,z2,g,tol)=>`평행광 렌즈(${nm} ${l} nm, 결정 안 허리 ${w0} μm): f = ${f} mm, 집속 렌즈에서 ${z2} mm (결정 뒷면에서 ${g} mm), 위치 허용 ±${tol} mm`,
+  copyL2b:(d,th,zr,ow)=>`평행광 직경 ${d} mm, 발산 반각 ${th} mrad, z_R′ = ${zr}, 출력 허리 렌즈 뒤 ${ow} mm`,
+  psEyebrow:"PPKTP 렌즈 배치 요약 · 선택한 렌즈 기준",
+  psTitle:(f,fr,f2,g)=>`집속 <span class="mono">f = ${f} mm</span>, 결정 앞면 <span class="mono">${fr} mm</span>${f2?` · 평행광 <span class="mono" style="color:var(--spdc)">f = ${f2} mm</span>, 결정 뒷면에서 <span class="mono" style="color:var(--spdc)">${g} mm</span>`:""}`,
+  psBest:(a,b)=>`추천: 집속 f = ${a} mm${b?`, 평행광 f = ${b} mm`:""}`, psIsBest:"추천 렌즈와 같음",
+  psInputs:"입력 조건", psLam:"파장 λ", psBeam:"입사 빔 (1/e²)", psM2:"M² · 입사 허리→렌즈", psL:"결정 길이 L", psAp:"결정 단면", psN:"굴절률 n", psNauto:"(KTP n_y 자동)", psNman:"(직접 입력)",
+  psGap:"렌즈–결정 최소 간격", psLens:"후보 렌즈", psLensStep:(a,b,s,n)=>`${a}–${b} mm, ${s} mm 간격 (${n}개)`, psLensStd:n=>`시판 표준 초점거리 (${n}개)`, psLensList:n=>`직접 입력 목록 (${n}개)`,
+  psPos:"결정 설치 거리 (렌즈 주평면 기준)", psBeamH:f=>`빔 파라미터 (집속 f = ${f} mm)`,
+  psWdiam:`허리 직경 2${SYM.wout}`, psXiCls:c=>`${SYM.xiLb} · ${c}`, psLFor:`${SYM.xi1284}가 되는 L`, psApErr:`근사식 ${SYM.approx} 오차`, psT:"개구 투과율",
+  ps2H:(n,l)=>`평행광 렌즈 (2단계) · ${n} ${l} nm`, ps2f:"평행광 렌즈 초점거리", ps2from1:"집속 렌즈에서", ps2fromBack:"결정 뒷면에서", ps2tol:"렌즈 위치 허용", ps2out:"출력 허리 (렌즈 뒤)",
+  ps2D:`평행광 직경 2${SYM.wp}`, ps2Dt:"목표 직경", ps2Th:`발산 반각 ${SYM.th}`, ps2Zr:`${SYM.zRp} (평행 유지)`, ps2W0:`결정 안 허리 ${SYM.w0}`,
+  psLayoutCap:"전체 배치도. 가로는 실제 거리 비율, 세로(빔 반경, 결정 두께)는 같은 배율로 확대.", psLayoutCap2:" 결정 중심부터는 평행광으로 만들 빛.",
+  psZoomCap:"결정 부근 확대도. 가로는 렌즈로부터 거리(mm), 세로는 빔 반경(μm), 보라색 띠는 결정 안 레일리 범위 b.",
+  psNb:"이웃 집속 렌즈 비교", psSel:"선택", psStatus:"판정",
+  psNbHead:`<th>f (mm)</th><th>${SYM.wout} (μm)</th><th>${SYM.zR} 공기 (mm)</th><th>${SYM.zR} 결정 (mm)</th><th>ξ</th><th>앞면 (mm)</th><th>중심 (mm)</th><th>면 빔 직경 (μm)</th><th style="text-align:left">판정</th>`,
+  psFoot:"얇은 렌즈, Self 공식. 거리는 렌즈 주평면 기준(평볼록 렌즈는 곡면 쪽 꼭짓점 근처). ★ = 추천 렌즈(개구 투과율 99.5% 이상·최소 간격을 만족하며 ξ가 목표에 가장 가까운 것). 평행광 렌즈: 겉보기 허리에서 f₂ 떨어진 f–f 배치, SPDC 모드는 펌프와 같은 b 가정. 굴절률 자동값은 KTP n_y Sellmeier(Kato & Takaoka 2002).",
+  notesSum:"계산 방법과 가정",
+  notesBody:()=>`<p><b>집속 허리</b> (Self의 가우시안 빔 렌즈 공식, 얇은 렌즈). 입사 허리가 렌즈 앞 ${SYM.din}에 있을 때:</p>
+  <div class="eqs">${EQ.wout}${EQ.dout}</div>
+  <p><b>레일리 길이와 근사식.</b> 근사식과의 차이는 상세 정보에 표시합니다.</p>
+  <div class="eqs">${EQ.zRin}${EQ.zR}${EQ.approx}</div>
+  <p><b>결정 안.</b> 레일리 길이가 n배 늘어나고, 길이 L인 결정은 공기 L/n과 같아서 허리가 Δz만큼 뒤로 밀립니다. 그래서 허리를 결정 중심에 두려면 앞면을 ${SYM.zfront}에 놓습니다.</p>
+  <div class="eqs">${EQ.xi}${EQ.front}${EQ.face}</div>
+  <p><b>개구 투과율.</b> 결정 두께 t, 폭 W 방향의 가우시안 클리핑으로 계산해 99.5% 미만이면 경고합니다.</p>
+  <div class="eqs">${EQ.T}</div>
+  <p><b>ξ 고르기.</b> ${SYM.xiBK}는 Boyd–Kleinman 최적(SHG, SPDC 쌍 생성률 최대)이고, ${SYM.xiLe1}은 단일모드 수집 효율과 스펙트럼 순도에 유리하다고 알려져 있습니다. 결정 안 레일리 길이가 결정 길이 이상(z_R^KTP ≥ L)이 되려면 ξ ≤ 0.5를 고르세요. 추천 렌즈는 개구와 간격 조건을 만족하는 렌즈 중 ${SYM.lnxi}가 가장 작은 것입니다. 근사식 오차가 1%를 넘으면 표시합니다.</p>
+  <p><b>굴절률 자동값.</b> KTP ${SYM.ny} Sellmeier 식(Kato &amp; Takaoka, Appl. Opt. 41, 5040, 2002; 유효 범위 0.43–3.54 μm)입니다. 405 nm는 범위 밖 외삽이므로 결정 데이터시트 값이 있으면 직접 입력하세요.</p>
+  <div class="eqs">${EQ.sell}</div>
+  <p><b>2단계, 평행광 렌즈.</b> 결정 밖에서 보면 허리는 결정 뒷면에서 ${SYM.L2n}만큼 안쪽에 있는 것처럼 보입니다(겉보기 허리). 이 겉보기 허리에서 렌즈 2까지의 거리를 ${SYM.d2x}로 두면 Self 공식이 그대로 적용됩니다. 기본값은 ${SYM.x0}(f–f 배치)이며, 이때 출력 허리는 렌즈 뒤 정확히 ${SYM.f2}에 생깁니다.</p>
+  <div class="eqs">${EQ.app}${EQ.wp}${EQ.theta}</div>
+  <p>평행광 허리를 렌즈 뒤 거리 D에 두려면 ${SYM.quad}의 작은 근을 씁니다. 이 근은 ${SYM.reach}일 때만 있습니다. 렌즈 위치 오차 x는 출력 허리를 ${SYM.shift}만큼 옮기므로, ${SYM.tol}이면 출력 허리가 ${SYM.zRp} 안에서 움직입니다. 이 값을 렌즈 위치 허용 범위로 표시합니다.</p>
+  <p><b>SPDC 수집 모드.</b> 축퇴 type-II SPDC(${SYM.degen})에서 수집 모드가 펌프와 같은 공초점 파라미터 b를 가진다고 가정하면 허리 반경은 다음과 같습니다. 고급 설정에서 다른 가정으로 바꿀 수 있습니다.</p>
+  <div class="eqs">${EQ.ws}</div>
+  <p><b>한계.</b> 거리는 얇은 렌즈의 주평면 기준입니다. 평볼록 렌즈는 주평면이 곡면 쪽 꼭짓점 근처에 있으니 마운트 위치를 보정하세요. 결정 면의 반사, 열 렌즈, 비대칭 빔은 고려하지 않았습니다.</p>`
+},
+en:{
+  docTitle:"PPKTP Focusing Lens Selector", title:"PPKTP Focusing Lens Selector",
+  intro:"Enter the beam size, wavelength and crystal length. Step 1 picks the focusing lens and crystal position; step 2 picks the collimating lens after the crystal and where to put it. Choose other lenses from the list in each step; the printout follows your choices.",
+  printBtn:"Print A4 summary", printErr:"Check the inputs first", inputsAria:"Inputs",
+  beamSize:"Input beam size (1/e²)", radiusOrDiam:"Diameter or radius", radius:"Radius", diameter:"Diameter",
+  beamConvR:v=>`Diameter 2w = ${v} mm`, beamConvD:v=>`Radius w = ${v} mm`,
+  wavelength:"Wavelength λ", nShort:(n,a)=>`Crystal index n = ${n}${a?" (auto, change in advanced settings)":""}`,
+  crystalL:"Crystal length L", Lpresets:"Common crystal lengths",
+  xiLbl:`What matters most? (target ${SYM.xi})`, xiPurity:"Purity 0.5", xiConfocal:"Confocal 1", xiRate:"Pair rate 2.84", custom:"Custom", xiCustomAria:"Custom target ξ",
+  advSum:"Advanced: candidate lenses, crystal aperture, refractive index, input beam",
+  lensLbl:"Candidate lenses", lensStep:"Fixed step", lensStd:"Stock focal lengths", lensList:"Custom list", fMin:"Min f", fMax:"Max f", fStep:"Step",
+  fList:"Focal lengths (mm, comma-separated)", aperture:"Crystal cross-section (clear aperture)", thickAria:"Thickness", widthAria:"Width", mmThick:"mm thick", mmWide:"mm wide",
+  minGap:"Minimum lens–crystal gap (both sides, for mounts and oven)", nPump:"Pump refractive index n", nAuto:"KTP n_y (auto)", manual:"Manual", nValAria:"Refractive index",
+  nHintOut:"Extrapolated outside the Sellmeier range (0.43–3.54 μm). Enter the datasheet value if you have it.", nHintIn:"Kato & Takaoka 2002 Sellmeier equation", nHintManual:"Enter the index for the pump polarization.",
+  dIn:`Input waist → lens distance ${SYM.din}`, dInHint:"Leave at 0 for a collimated beam", m2:`Beam quality ${SYM.M2}`, reset:"Reset to defaults",
+  eBeam:"Enter a beam size greater than 0.", eLam:"Enter a wavelength greater than 0.", eL:"Enter a crystal length greater than 0.", eXi:"Enter a target ξ greater than 0.",
+  eAp:"Enter crystal cross-section dimensions greater than 0.", eN:"The refractive index must be at least 1.", eM2:"M² must be at least 1.", eLens:"No candidate lenses. Check the lens range or list in advanced settings.",
+  inputCheck:"Check inputs",
+  step1:"Step 1", step1Title:"Focusing lens before the crystal", copyBtn:"Copy selected lenses (steps 1–2)", copied:"Copied", copyBlocked:"Copying is blocked here. Select the details and copy them by hand.",
+  goal:{"0.5":"purity first","1":"confocal","2.84":"max pair rate"}, goalCustom:"custom",
+  noneOk:"No lens meets every condition", closest:f=>`Closest candidate: <span class="mono">f = ${f} mm</span>`, notMet:"Conditions not met",
+  noneOkHint1:"Try changing the minimum gap, crystal aperture or lens range in advanced settings.",
+  reco1Eyebrow:(x,g)=>`Recommended focusing lens · target ξ = ${x} (${g})`,
+  reco1Title:(f,front)=>`<span class="mono">f = ${f} mm</span> lens, crystal front face <span class="mono">${front} mm</span> from the lens`,
+  reco1Text:(c,w,z,xi,off)=>`Crystal centre (waist) at <span class="mono">${c} mm</span>, focused waist radius <span class="mono">${w} μm</span>, Rayleigh length in the crystal <span class="mono">${z} mm</span>, ξ = <span class="mono">${xi}</span>${off?`. The lens steps are coarse, so focusing is ${off>1?"stronger":"weaker"} than the target`:""}.`,
+  neighbours:"Neighbours", backToBest:"Back to recommended",
+  list1Aria:"Candidate lens list", list1Title:"Candidate lenses", count:(n,tot)=>`${n}${tot?` / ${tot}`:""}`, onlyOK:"Valid only", stepLbl:"Step", stepAria:"Candidate lens step",
+  lcols1:`<span>f (mm)</span><span>${SYM.wout} μm</span><span>${SYM.zR} mm</span><span>${SYM.xi} (log)</span><span></span>`,
+  listAria:"Choose a lens. Use the up and down arrow keys",
+  listfoot1:box("var(--good-bg)","ξ 0.75–4","border:1px solid var(--good)")+box("var(--beam)","target ξ")+box("var(--warn)","caution")+box("var(--bad)","unusable"),
+  recommended:"Recommended",
+  xiCls:["very weak focusing","weak focusing","near confocal","near BK optimum","strong focusing","over-focused"],
+  pOverlapLens:"overlaps the lens", pGap:"gap too small", pClip:v=>`aperture clipping ${v}%`, pApprox:v=>`approximation error ${v}%`,
+  det1Title:f=>`f = ${f} mm lens`, chipBest:"★ recommended",
+  sWout:`Focused waist radius ${SYM.wout}`, sWoutSub:v=>`diameter ${v} μm`, sZR:`Rayleigh length ${SYM.zR} (air)`, sZRK:`${SYM.zRK} (in crystal)`,
+  sXi:`Focusing parameter ${SYM.xiLb}`, sXiSub:v=>`target ${v}`, sApprox:`Approximation ${SYM.approx}`, sApproxSub:v=>`error ${v}%`,
+  placeH:`Crystal position <span class="hint">from the lens principal plane</span>`, reqH:"Crystal size check",
+  pFront:"Crystal front face", pCenter:"Crystal centre (waist)", pBack:"Crystal back face", pF:"Lens focal point F", pDout:`Waist without crystal ${SYM.dout}`, pShift:`Waist shift caused by the crystal ${SYM.dz}`,
+  rL1:`Crystal length for ${SYM.xi1} with this lens`, rL284:`Crystal length for ${SYM.xi284} with this lens`, rFace:"Beam diameter at the crystal faces", rAp:`Recommended minimum aperture ${SYM.ap3}`,
+  rT:(h,w)=>`Transmission through a ${h} × ${w} mm aperture`, rLens:"Beam diameter at the lens",
+  layoutAria:"Layout from the lens to the crystal", layoutCap:"Layout. Horizontal distances are to scale; the vertical axis (beam radius, crystal thickness) is magnified by one common factor.",
+  zoomAria:"Close-up of the beam radius around the crystal. Hover to read the beam radius at that position",
+  zoomCap:`Close-up around the crystal. Horizontal: distance from the lens (mm); vertical: beam radius (μm). The violet band is the Rayleigh range inside the crystal, b = 2${SYM.zR}. Hover over the plot to read the beam size at any point.`,
+  legend1:`<span style="--c:var(--beam)">Pump beam (1/e² radius)</span><span style="--c:var(--crystal)">PPKTP crystal</span>`,
+  svLens:f=>`Lens f = ${f} mm`, svFocus:"| focus F", svNoCrystal:"○ waist without crystal", svInput:v=>`input 2w = ${v} mm`,
+  svToFront:v=>`to front face ${v} mm`, svToCenter:v=>`to crystal centre (waist) ${v} mm`, svFace:v=>`face 2w = ${v} μm`, svOff:v=>`crystal thickness ±${v} mm (off scale)`, svInCrystal:" · in crystal",
+  tableSum:"Show full comparison table", tbSub:(n,L,nn)=>`· ${n} lenses, L = ${L} mm, n = ${nn}`,
+  tableHead:`<th scope="col">f (mm)</th><th scope="col">${SYM.wout} (μm)</th><th scope="col">${SYM.zR} air (mm)</th><th scope="col">${SYM.zR} crystal (mm)</th><th scope="col">${SYM.xiLb}</th><th scope="col">Waist ${SYM.dout} (mm)</th><th scope="col">Front face (mm)</th><th scope="col">Face beam diam. (μm)</th><th scope="col" style="text-align:left">Status</th>`,
+  step2:"Step 2", step2Title:"Collimating lens after the crystal", s2ctx:f=>`Based on the f = ${f} mm focusing lens chosen in step 1`, inputs2Aria:"Collimating lens inputs",
+  srcLbl:"Light to collimate", spdc:"SPDC photons", pump:"Pump",
+  srcHintS:(l,w,a)=>`λ<sub>s</sub> = ${l} nm, waist radius in the crystal ${w} μm (${a})`, srcHintP:(l,w)=>`λ = ${l} nm, waist radius in the crystal ${w} μm`,
+  assume:{sameb:"same b as the pump",samew:"same waist as the pump",manual:"manual"},
+  dTarget:"Target collimated diameter (1/e²)", dPresetsAria:"Common collimated diameters", dIn:v=>`Same as input (${v})`,
+  outPos:"Collimated waist position (after the lens)", outPosPh:"blank = f–f layout", outPosHint:"Fill this in only when the waist must sit at a set place, such as a fiber coupler.",
+  adv2Sum:"Advanced: SPDC wavelength, refractive index, collection mode size", lamSLbl:`SPDC wavelength ${SYM.lamS}`, lamSAuto:"2λ (degenerate)", lamSAria:"SPDC wavelength",
+  nSLbl:`Crystal index ${SYM.nS} (SPDC wavelength)`, nSAria:"SPDC refractive index", nSHint:"In type-II the two photons are polarized along y and z and see different indices. A datasheet value is more accurate.",
+  modeLbl:"SPDC collection mode size", modeSameB:"Same b as the pump (same ξ, recommended)", modeSameW:"Same waist radius as the pump", modeManual:"Enter the waist radius", wsAria:"SPDC waist radius",
+  e2D:"Enter a target collimated diameter greater than 0.", e2Pos:"Leave the waist position blank or enter a value greater than 0.", e2Lam:"Enter an SPDC wavelength greater than 0.", e2N:"The SPDC refractive index must be at least 1.", e2W:"Enter an SPDC waist radius greater than 0.",
+  noneOk2Hint:"Try changing the minimum gap or lens range in step 1 advanced settings, or the collimated waist position.",
+  reco2Eyebrow:(n,d)=>`Recommended collimating lens · ${n} · target diameter ${d} mm`,
+  reco2Title:(f,g)=>`<span class="mono">f = ${f} mm</span> lens, <span class="mono">${g} mm</span> after the crystal back face`,
+  reco2Text:(z2,d,th,zr,tol,outW,off)=>`That is <span class="mono">${z2} mm</span> from the focusing lens. Collimated diameter <span class="mono">${d} mm</span>, divergence half-angle <span class="mono">${th} mrad</span>, collimated range ${SYM.zRp} = <span class="mono">${zr}</span>, lens position tolerance <span class="mono">±${tol} mm</span>${outW?`, output waist <span class="mono">${outW} mm</span> after the lens`:""}${off?`. The lens steps are coarse, so the beam is ${off>1?"larger":"smaller"} than the target`:""}.`,
+  list2Aria:"Collimating lens candidates", list2Title:"Collimating lens candidates", list2BoxAria:"Choose a collimating lens. Use the up and down arrow keys",
+  lcols2:`<span>f (mm)</span><span>Crystal→lens</span><span>Div. mrad</span><span>Diameter mm</span><span></span>`,
+  listfoot2:box("var(--good-bg)","target ±30%","border:1px solid var(--good)")+box("var(--spdc)","target diameter")+box("var(--warn)","caution")+box("var(--bad)","unusable"),
+  p2Overlap:"overlaps the crystal", p2Reach:"waist position unreachable", fitBig:"larger than target", fitSmall:"smaller than target", fitOk:"near target",
+  det2Title:f=>`f = ${f} mm collimating lens`,
+  s2D:`Collimated diameter 2${SYM.wp}`, s2DSub:v=>`target ${v} mm`, s2Th:`Divergence half-angle ${SYM.th}`, s2ThSub:v=>`diameter at 1 m: ${v} mm`,
+  s2ZR:`Collimated range ${SYM.zRp}`, s2ZRSub:v=>`output waist ${v} mm after the lens`, s2Gap:"Crystal back face → lens", s2GapSub:v=>`${v} mm from the focusing lens`,
+  s2Tol:"Lens position tolerance", s2TolSub:`${SYM.zR} of the apparent waist`,
+  place2H:`Lens position <span class="hint">from the lens principal plane</span>`, beam2H:"Beam",
+  q1:"Focusing lens → collimating lens", q2:"Crystal back face → collimating lens", q3:`Apparent waist → lens ${SYM.d2}`, q4:"Apparent waist (from the focusing lens)", q5:"Output waist (after the collimating lens)", q6:"Lens position tolerance",
+  b1:"Light to collimate", b2:`Waist radius in the crystal ${SYM.w0}`, b3:`Rayleigh length in air ${SYM.zR}`, b4:"Beam diameter at the collimating lens", b5:"Ideal f for the target diameter", b6:"Crystal index (this light)",
+  systemAria:"Layout from the focusing lens to the collimating lens", systemCap:"Layout. Horizontal distances are to scale; the vertical axis (beam radius, crystal thickness) is magnified by one common factor. From the crystal centre on, the light being collimated is drawn.",
+  colAria:"Beam diameter versus distance after the collimating lens", colCap:`Beam diameter (1/e²) versus distance after the collimating lens. The dashed line is the target diameter; the band is ${SYM.pmzRp} around the output waist (diameter within √2 of the waist).`,
+  legend2:`<span style="--c:var(--beam)">Pump</span><span style="--c:var(--spdc)">SPDC photons</span><span style="--c:var(--crystal)">PPKTP crystal</span>`,
+  svL1:f=>`Focusing lens f = ${f} mm`, svL2:f=>`Collimating lens f = ${f} mm`, svFront2:v=>`front face ${v} mm`, svGap2:v=>`back face → lens ${v} mm`, svTotal:v=>`focusing lens → collimating lens ${v} mm`,
+  svTarget:v=>`target ${v} mm`, svOutWaist:"output waist", svColAxis:"Distance after the collimating lens (mm)",
+  copyHead:(lam,w,L,n,m2)=>`PPKTP focusing: λ = ${lam} nm, w_in = ${w} mm (radius, 1/e²), L = ${L} mm, n = ${n}, M² = ${m2}`,
+  copyL1:(f,w,za,zc,b,xi)=>`Focusing lens f = ${f} mm: w_out = ${w} μm, z_R(air) = ${za} mm, z_R(crystal) = ${zc} mm, b = ${b} mm, ξ = ${xi}`,
+  copyPos:(a,b,c)=>`Crystal position (from lens principal plane): front ${a} mm, centre ${b} mm, back ${c} mm`,
+  copyFace:(d,h,w,T)=>`Beam diameter at crystal faces ${d} μm, ${h}×${w} mm aperture transmission ${T}%`,
+  copyL2:(nm,l,w0,f,z2,g,tol)=>`Collimating lens (${nm} ${l} nm, waist in crystal ${w0} μm): f = ${f} mm, ${z2} mm from the focusing lens (${g} mm after the crystal back face), tolerance ±${tol} mm`,
+  copyL2b:(d,th,zr,ow)=>`Collimated diameter ${d} mm, divergence half-angle ${th} mrad, z_R′ = ${zr}, output waist ${ow} mm after the lens`,
+  psEyebrow:"PPKTP lens layout summary · selected lenses",
+  psTitle:(f,fr,f2,g)=>`Focusing <span class="mono">f = ${f} mm</span>, crystal front face <span class="mono">${fr} mm</span>${f2?` · collimating <span class="mono" style="color:var(--spdc)">f = ${f2} mm</span>, <span class="mono" style="color:var(--spdc)">${g} mm</span> after the crystal`:""}`,
+  psBest:(a,b)=>`Recommended: focusing f = ${a} mm${b?`, collimating f = ${b} mm`:""}`, psIsBest:"Same as recommended",
+  psInputs:"Inputs", psLam:"Wavelength λ", psBeam:"Input beam (1/e²)", psM2:"M² · input waist → lens", psL:"Crystal length L", psAp:"Crystal cross-section", psN:"Refractive index n", psNauto:"(KTP n_y auto)", psNman:"(manual)",
+  psGap:"Minimum lens–crystal gap", psLens:"Candidate lenses", psLensStep:(a,b,s,n)=>`${a}–${b} mm, ${s} mm step (${n})`, psLensStd:n=>`Stock focal lengths (${n})`, psLensList:n=>`Custom list (${n})`,
+  psPos:"Crystal position (from the lens principal plane)", psBeamH:f=>`Beam parameters (focusing f = ${f} mm)`,
+  psWdiam:`Waist diameter 2${SYM.wout}`, psXiCls:c=>`${SYM.xiLb} · ${c}`, psLFor:`L for ${SYM.xi1284}`, psApErr:`${SYM.approx} error`, psT:"Aperture transmission",
+  ps2H:(n,l)=>`Collimating lens (step 2) · ${n} ${l} nm`, ps2f:"Collimating focal length", ps2from1:"From the focusing lens", ps2fromBack:"From the crystal back face", ps2tol:"Lens position tolerance", ps2out:"Output waist (after lens)",
+  ps2D:`Collimated diameter 2${SYM.wp}`, ps2Dt:"Target diameter", ps2Th:`Divergence half-angle ${SYM.th}`, ps2Zr:`${SYM.zRp} (collimated range)`, ps2W0:`Waist in crystal ${SYM.w0}`,
+  psLayoutCap:"Layout: distances to scale, beam radius and crystal thickness magnified.", psLayoutCap2:" Light being collimated drawn from the crystal centre on.",
+  psZoomCap:"Close-up: distance from the lens (mm) vs beam radius (μm); violet band = b, the Rayleigh range in the crystal.",
+  psNb:"Neighbouring focusing lenses", psSel:"selected", psStatus:"Status",
+  psNbHead:`<th>f (mm)</th><th>${SYM.wout} (μm)</th><th>${SYM.zR} air (mm)</th><th>${SYM.zR} crystal (mm)</th><th>ξ</th><th>Front (mm)</th><th>Centre (mm)</th><th>Face diam. (μm)</th><th style="text-align:left">Status</th>`,
+  psFoot:"Thin lens, Self's formula; distances from the lens principal plane. ★ = recommended (transmission ≥ 99.5%, gap met, ξ nearest the target). Collimating lens: f–f layout from the apparent waist; SPDC mode shares the pump's b. Auto index: KTP n_y Sellmeier (Kato & Takaoka 2002).",
+  notesSum:"Method and assumptions",
+  notesBody:()=>`<p><b>Focused waist</b> (Self's Gaussian-beam lens formula, thin lens), with the input waist a distance ${SYM.din} before the lens:</p>
+  <div class="eqs">${EQ.wout}${EQ.dout}</div>
+  <p><b>Rayleigh length and the approximation.</b> The difference from the approximation is shown in the details.</p>
+  <div class="eqs">${EQ.zRin}${EQ.zR}${EQ.approx}</div>
+  <p><b>Inside the crystal.</b> The Rayleigh length grows by a factor n, and a crystal of length L acts like L/n of air, so the waist moves back by Δz. To put the waist at the crystal centre, place the front face at ${SYM.zfront}.</p>
+  <div class="eqs">${EQ.xi}${EQ.front}${EQ.face}</div>
+  <p><b>Aperture transmission.</b> Gaussian clipping along the crystal thickness t and width W; a warning appears below 99.5%.</p>
+  <div class="eqs">${EQ.T}</div>
+  <p><b>Choosing ξ.</b> ${SYM.xiBK} is the Boyd–Kleinman optimum (maximum SHG or SPDC pair rate); ${SYM.xiLe1} is known to favour single-mode collection efficiency and spectral purity. For a Rayleigh length in the crystal at least as long as the crystal (z_R^KTP ≥ L), choose ξ ≤ 0.5. The recommended lens is the one with the smallest ${SYM.lnxi} among lenses that meet the aperture and gap conditions. Approximation errors above 1% are flagged.</p>
+  <p><b>Auto refractive index.</b> KTP ${SYM.ny} Sellmeier equation (Kato &amp; Takaoka, Appl. Opt. 41, 5040, 2002; valid 0.43–3.54 μm). 405 nm is an extrapolation, so enter the datasheet value if you have it.</p>
+  <div class="eqs">${EQ.sell}</div>
+  <p><b>Step 2, collimating lens.</b> Seen from outside, the waist appears ${SYM.L2n} inside the crystal back face (the apparent waist). Writing the distance from this apparent waist to lens 2 as ${SYM.d2x}, Self's formula applies directly. The default is ${SYM.x0} (f–f layout), which puts the output waist exactly ${SYM.f2} after the lens.</p>
+  <div class="eqs">${EQ.app}${EQ.wp}${EQ.theta}</div>
+  <p>To place the collimated waist a distance D after the lens, the small root of ${SYM.quad} is used; it exists only when ${SYM.reach}. A lens position error x moves the output waist by ${SYM.shift}, so for ${SYM.tol} the output waist stays within ${SYM.zRp}. This is shown as the lens position tolerance.</p>
+  <p><b>SPDC collection mode.</b> For degenerate type-II SPDC (${SYM.degen}), assuming the collection mode shares the pump's confocal parameter b gives the waist radius below. Other assumptions can be chosen in the advanced settings.</p>
+  <div class="eqs">${EQ.ws}</div>
+  <p><b>Limits.</b> Distances are measured from the thin-lens principal plane. For a plano-convex lens the principal plane sits near the curved-side vertex, so correct the mount position. Reflections at the crystal faces, thermal lensing and asymmetric beams are not modelled.</p>`
+}};
+let lang="ko";
+function t(k,...a){const v=(STR[lang][k]!==undefined)?STR[lang][k]:STR.ko[k];return typeof v==="function"?v(...a):(v===undefined?k:v);}
+
 const ids=["beamSize","lambda","L","xiTarget","xiCustom","lensMode","fMin","fMax","fStep","fList","apH","apW","minGap","nMode","nVal","dIn","m2","onlyOK","src","dTarget","outPos","lamSMode","lamS","nSMode","nS","modeAssume","wsManual","onlyOK2"];
 const IDS2=new Set(["src","dTarget","outPos","lamSMode","lamS","nSMode","nS","modeAssume","wsManual","onlyOK2"]);
 const DEF={}; ids.forEach(k=>{const e=$(k);DEF[k]=e.type==="checkbox"?e.checked:e.value;});
 const STD=[25,30,35,40,50,60,75,100,125,150,175,200,250,300,400,500];
 let beamMode="r", selF=null, userPicked=false, rows=[], bestF=null, P=null, zoomMap=null;
 let selF2=null, userPicked2=false, rows2=[], bestF2=null, S=null, R1=null;
-const KEY="ppktp-lens-selector-v2";
+const KEY="ppktp-lens-selector-v2", LANGKEY="ppktp-lens-selector-lang";
 const TEXCACHE=new Map(); let mjReady=false;
 function texHTML(tex,disp){const k=(disp?"D":"I")+tex;if(!TEXCACHE.has(k)){let h=null;try{const n=MathJax.tex2svg(tex,{display:!!disp});n.querySelectorAll("mjx-assistive-mml").forEach(x=>x.remove());const sv=n.querySelector("svg");if(sv){sv.setAttribute("aria-hidden","true");sv.removeAttribute("role");}h=n.outerHTML;}catch(e){}TEXCACHE.set(k,h);}return TEXCACHE.get(k);}
 function typesetIn(root){if(!mjReady||!root)return;root.querySelectorAll("[data-tex]:not(.ok)").forEach(el=>{const h=texHTML(el.dataset.tex,el.classList.contains("disp"));if(h){el.innerHTML=h;el.classList.add("ok");el.setAttribute("aria-label",el.dataset.tex);}});}
@@ -552,11 +813,24 @@ window.__mjReady=()=>{mjReady=true;typesetIn(document.body);};
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY)||"null");if(!s)return;ids.forEach(k=>{const e=$(k);if(s[k]===undefined||!e)return;if(e.type==="checkbox")e.checked=!!s[k];else e.value=s[k];});if(s.beamMode)beamMode=s.beamMode;if(s.adv)$("advBox").open=true;if(s.adv2)$("adv2").open=true;}catch(e){}}
 function save(){try{const s={beamMode,adv:$("advBox").open,adv2:$("adv2").open};ids.forEach(k=>{const e=$(k);s[k]=e.type==="checkbox"?e.checked:e.value;});localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}}
 
-function erf(x){const s=Math.sign(x);x=Math.abs(x);const t=1/(1+0.3275911*x);return s*(1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x));}
+/* ---------- language ---------- */
+function applyStatic(){
+  document.documentElement.lang=lang;
+  document.title=t("docTitle");
+  document.querySelectorAll("[data-i18n]").forEach(el=>{el.innerHTML=t(el.dataset.i18n);});
+  document.querySelectorAll("[data-i18n-aria]").forEach(el=>el.setAttribute("aria-label",t(el.dataset.i18nAria)));
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>el.setAttribute("placeholder",t(el.dataset.i18nPh)));
+  document.querySelectorAll("#langSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.lang===lang));
+}
+function setLang(l){lang=l==="en"?"en":"ko";try{localStorage.setItem(LANGKEY,lang);}catch(e){}applyStatic();run();}
+$("langSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(b&&b.dataset.lang!==lang)setLang(b.dataset.lang);});
+
+function erf(x){const s=Math.sign(x);x=Math.abs(x);const tt=1/(1+0.3275911*x);return s*(1-(((((1.061405429*tt-1.453152027)*tt)+1.421413741)*tt-0.284496736)*tt+0.254829592)*tt*Math.exp(-x*x));}
 function nKTPy(lum){const l2=lum*lum;return Math.sqrt(3.45018+0.04341/(l2-0.04597)+16.98825/(l2-39.43799));}
 function sig(v,d=4){if(!isFinite(v))return"—";const a=Math.abs(v);if(a===0)return"0";const p=Math.max(0,d-1-Math.floor(Math.log10(a)));return v.toFixed(Math.min(p,6));}
 function fx(v,p){return isFinite(v)?v.toFixed(p):"—";}
 function fmm(v){return String(Math.round(v*1000)/1000);}
+function fmtLen(mm){return mm>=1000?`${sig(mm/1000,3)} m`:`${sig(mm,3)} mm`;}
 
 function lensList(){
   const m=$("lensMode").value;
@@ -566,7 +840,6 @@ function lensList(){
   if(a>0&&b>=a&&st>0&&(b-a)/st<=300)for(let f=a;f<=b+1e-9;f+=st)out.push(Math.round(f*1000)/1000);
   return out;
 }
-
 function readInputs(){
   const g=k=>parseFloat($(k).value);
   const size=g("beamSize"), lam=g("lambda");
@@ -576,19 +849,17 @@ function readInputs(){
   return {win:beamMode==="r"?size:size/2, lam, L:g("L"), xiT:xs==="custom"?g("xiCustom"):parseFloat(xs),
     apH:g("apH"), apW:g("apW"), minGap:g("minGap")||0, n, dIn:g("dIn")||0, m2:g("m2"), lenses:lensList()};
 }
-
 function validate(P){
-  if(!(P.win>0))return"빔 크기를 0보다 큰 값으로 입력하세요.";
-  if(!(P.lam>0))return"파장을 0보다 큰 값으로 입력하세요.";
-  if(!(P.L>0))return"결정 길이를 0보다 크게 입력하세요.";
-  if(!(P.xiT>0))return"목표 ξ를 0보다 크게 입력하세요.";
-  if(!(P.apH>0&&P.apW>0))return"결정 단면 치수를 0보다 크게 입력하세요.";
-  if(!(P.n>=1))return"굴절률은 1 이상이어야 합니다.";
-  if(!(P.m2>=1))return"M²는 1 이상이어야 합니다.";
-  if(!P.lenses.length)return"후보 렌즈가 없습니다. 고급 설정에서 렌즈 범위나 목록을 확인하세요.";
+  if(!(P.win>0))return t("eBeam");
+  if(!(P.lam>0))return t("eLam");
+  if(!(P.L>0))return t("eL");
+  if(!(P.xiT>0))return t("eXi");
+  if(!(P.apH>0&&P.apW>0))return t("eAp");
+  if(!(P.n>=1))return t("eN");
+  if(!(P.m2>=1))return t("eM2");
+  if(!P.lenses.length)return t("eLens");
   return"";
 }
-
 function compute(f){
   const le=P.lam*1e-6*P.m2;
   const zRin=Math.PI*P.win*P.win/le, x=P.dIn-f, den=x*x+zRin*zRin;
@@ -604,46 +875,44 @@ function compute(f){
   r.level=(!r.apOK||r.front<0)?"bad":(!r.gapOK||r.xi>=8)?"warn":"";
   return r;
 }
-
 function xiClass(xi){
-  if(xi<0.3)return["매우 약한 집속","info"];
-  if(xi<0.75)return["약한 집속","info"];
-  if(xi<1.5)return["공초점 근처","good"];
-  if(xi<4)return["BK 최적 근처","good"];
-  if(xi<8)return["강한 집속","warn"];
-  return["과집속","bad"];
+  const c=t("xiCls");
+  if(xi<0.3)return[c[0],"info"];
+  if(xi<0.75)return[c[1],"info"];
+  if(xi<1.5)return[c[2],"good"];
+  if(xi<4)return[c[3],"good"];
+  if(xi<8)return[c[4],"warn"];
+  return[c[5],"bad"];
 }
 function problems(r){
   const p=[];
-  if(r.front<0)p.push(["bad","렌즈와 겹침"]);else if(!r.gapOK)p.push(["warn","간격 부족"]);
-  if(!r.apOK)p.push(["bad",`개구 클리핑 ${fx(r.T*100,1)}%`]);
-  if(Math.abs(r.approxErr)>0.01)p.push(["warn",`근사식 오차 ${fx(r.approxErr*100,1)}%`]);
+  if(r.front<0)p.push(["bad",t("pOverlapLens")]);else if(!r.gapOK)p.push(["warn",t("pGap")]);
+  if(!r.apOK)p.push(["bad",t("pClip",fx(r.T*100,1))]);
+  if(Math.abs(r.approxErr)>0.01)p.push(["warn",t("pApprox",fx(r.approxErr*100,1))]);
   return p;
 }
-function chips(r){const [t,c]=xiClass(r.xi);return `<span class="chip ${c}">${t}</span> `+problems(r).map(([c,t])=>`<span class="chip ${c}">${t}</span>`).join(" ");}
+function chips(r){const [tt,c]=xiClass(r.xi);return `<span class="chip ${c}">${tt}</span> `+problems(r).map(([c,tt])=>`<span class="chip ${c}">${tt}</span>`).join(" ");}
 
 /* ---------- main ---------- */
 function run(){
   syncControls();
   P=readInputs();
-  $("beamConv").textContent=beamMode==="r"?`직경 2w = ${sig(P.win*2,4)} mm`:`반경 w = ${sig(P.win,4)} mm`;
+  $("beamConv").textContent=beamMode==="r"?t("beamConvR",sig(P.win*2,4)):t("beamConvD",sig(P.win,4));
   const lum=P.lam/1000, auto=$("nMode").value==="auto";
-  $("nShort").textContent=P.n>0?`결정 굴절률 n = ${P.n.toFixed(4)}${auto?" (자동, 고급 설정에서 변경)":""}`:"";
-  $("nHint").textContent=auto?(lum<0.43||lum>3.54?"Sellmeier 유효 범위(0.43–3.54 μm) 밖 외삽값입니다. 데이터시트 값이 있으면 직접 입력하세요.":"Kato & Takaoka 2002 Sellmeier 식"):"펌프 편광 방향의 굴절률을 넣으세요.";
+  $("nShort").textContent=P.n>0?t("nShort",P.n.toFixed(4),auto):"";
+  $("nHint").textContent=auto?(lum<0.43||lum>3.54?t("nHintOut"):t("nHintIn")):t("nHintManual");
   const err=validate(P);$("inErr").textContent=err;
-  if(err){$("recoEyebrow").textContent="입력 확인";$("recoTitle").textContent=err;$("recoText").textContent="";$("recoAlts").innerHTML="";if(!$("advBox").open&&/렌즈|단면|굴절률|M²/.test(err))$("advBox").open=true;return;}
+  if(err){$("recoEyebrow").textContent=t("inputCheck");$("recoTitle").textContent=err;$("recoText").textContent="";$("recoAlts").innerHTML="";if(!$("advBox").open&&err!==t("eBeam")&&err!==t("eLam")&&err!==t("eL")&&err!==t("eXi"))$("advBox").open=true;return;}
   save();
   rows=P.lenses.map(compute);
   const okRows=rows.filter(r=>r.ok), pool=okRows.length?okRows:rows;
   const dist=r=>Math.abs(Math.log(r.xi/P.xiT));
-  const best=pool.reduce((a,r)=>dist(r)<dist(a)?r:a,pool[0]);
-  bestF=best.f;
+  bestF=pool.reduce((a,r)=>dist(r)<dist(a)?r:a,pool[0]).f;
   if(!userPicked||!rows.some(r=>r.f===selF))selF=bestF;
   renderReco();renderList();renderTable();renderDetail();
   run2();
   typesetIn(document.body);
 }
-
 function syncControls(){
   $("modeR").setAttribute("aria-pressed",beamMode==="r");$("modeD").setAttribute("aria-pressed",beamMode==="d");
   const xs=$("xiTarget").value;
@@ -654,51 +923,48 @@ function syncControls(){
   $("stepBox").hidden=lm!=="step";$("listBox").hidden=lm!=="list";$("stdHint").hidden=lm!=="std";
   const Lv=parseFloat($("L").value);
   document.querySelectorAll("#Lpresets button").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.v===Lv));
+  const st=+$("fStep").value, mn=+$("fMin").value;
+  document.querySelectorAll(".stepSeg button").forEach(b=>{const v=+b.dataset.step;b.setAttribute("aria-pressed",lm==="step"&&st===v&&mn===v);});
 }
-
 function renderReco(){
   const best=rows.find(r=>r.f===bestF), okRows=rows.filter(r=>r.ok);
-  const goal={"0.5":"순도 우선","1":"공초점","2.84":"생성률 최대"}[$("xiTarget").value]||"직접 지정";
+  const goal=t("goal")[$("xiTarget").value]||t("goalCustom");
   if(!okRows.length){
-    $("recoEyebrow").textContent="조건을 모두 만족하는 렌즈가 없습니다";
-    $("recoTitle").innerHTML=`가장 가까운 후보는 <span class="mono">f = ${fmm(best.f)} mm</span>`;
-    $("recoText").innerHTML=`${problems(best).map(p=>p[1]).join(", ")||"조건 미충족"}. 고급 설정에서 최소 간격, 결정 단면, 후보 렌즈 범위를 바꿔 보세요.`;
+    $("recoEyebrow").textContent=t("noneOk");
+    $("recoTitle").innerHTML=t("closest",fmm(best.f));
+    $("recoText").innerHTML=`${problems(best).map(p=>p[1]).join(", ")||t("notMet")}. ${t("noneOkHint1")}`;
   }else{
-    $("recoEyebrow").textContent=`집속 렌즈 추천 · 목표 ξ = ${sig(P.xiT,3)} (${goal})`;
-    $("recoTitle").innerHTML=`<span class="mono">f = ${fmm(best.f)} mm</span> 렌즈, 결정 앞면을 렌즈에서 <span class="mono">${fx(best.front,1)} mm</span>에`;
+    $("recoEyebrow").textContent=t("reco1Eyebrow",sig(P.xiT,3),goal);
+    $("recoTitle").innerHTML=t("reco1Title",fmm(best.f),fx(best.front,1));
     const diff=best.xi/P.xiT;
-    $("recoText").innerHTML=`결정 중심(허리)은 <span class="mono">${fx(best.center,1)} mm</span>, 집속 허리 반경 <span class="mono">${fx(best.wOut*1000,1)} μm</span>, 결정 안 레일리 길이 <span class="mono">${sig(best.zRcr,3)} mm</span>, ξ = <span class="mono">${sig(best.xi,3)}</span>${Math.abs(Math.log(diff))>Math.log(1.3)?`. 후보 렌즈 간격이 넓어 목표보다 ${diff>1?"강하게":"약하게"} 집속됩니다`:""}.`;
+    $("recoText").innerHTML=t("reco1Text",fx(best.center,1),fx(best.wOut*1000,1),sig(best.zRcr,3),sig(best.xi,3),Math.abs(Math.log(diff))>Math.log(1.3)?diff:0);
   }
-  const i=rows.findIndex(r=>r.f===bestF);
-  const near=[rows[i-1],rows[i+1]].filter(Boolean);
-  let html=near.length?`<span>이웃 렌즈</span>`+near.map(r=>`<button type="button" data-f="${r.f}">f ${fmm(r.f)} · ξ ${sig(r.xi,2)}</button>`).join(""):"";
-  if(selF!==bestF)html=`<button type="button" data-f="${bestF}">추천 렌즈로 돌아가기</button>`+html;
+  const i=rows.findIndex(r=>r.f===bestF), near=[rows[i-1],rows[i+1]].filter(Boolean);
+  let html=near.length?`<span>${t("neighbours")}</span>`+near.map(r=>`<button type="button" data-f="${r.f}">f ${fmm(r.f)} · ξ ${sig(r.xi,2)}</button>`).join(""):"";
+  if(selF!==bestF)html=`<button type="button" data-f="${bestF}">${t("backToBest")}</button>`+html;
   $("recoAlts").innerHTML=html;
 }
-
 const XI_LO=0.1, XI_HI=30;
 function xiPos(v){const c=Math.min(XI_HI,Math.max(XI_LO,v));return +(Math.log(c/XI_LO)/Math.log(XI_HI/XI_LO)*100).toFixed(1);}
 function renderList(){
   const only=$("onlyOK").checked;
   const shown=rows.filter(r=>!only||r.ok||r.f===selF);
-  $("listCount").textContent=`${shown.length}${only?` / ${rows.length}`:""}개`;
+  $("listCount").textContent=t("count",shown.length,only?rows.length:0);
   const z0=xiPos(0.75),z1=xiPos(4),tg=xiPos(P.xiT);
   $("list").innerHTML=shown.map(r=>{
     const pr=problems(r).map(p=>p[1]).join(", ");
     return `<button type="button" class="lrow${r.ok?"":" dim"}" role="option" id="opt-${r.f}" data-f="${r.f}" aria-selected="${r.f===selF}">
-      <span class="f">${fmm(r.f)}${r.f===bestF?'<span class="star" aria-label="추천">★</span>':""}</span>
+      <span class="f">${fmm(r.f)}${r.f===bestF?`<span class="star" aria-label="${t("recommended")}">★</span>`:""}</span>
       <span>${fx(r.wOut*1000,1)}</span><span>${sig(r.zRair,3)}</span>
       <span class="xi"><span class="xv">${sig(r.xi,3)}</span><span class="bar"><span class="zone" style="left:${z0}%;width:${(z1-z0).toFixed(1)}%"></span><span class="tgt" style="left:${tg}%"></span><span class="dot" style="left:${xiPos(r.xi)}%"></span></span></span>
       <span class="flag ${r.level}" title="${pr}">${pr?`<span class="sr">${pr}</span>`:""}</span></button>`;}).join("");
 }
-
 function renderTable(){
-  $("tbSub").textContent=`· ${rows.length}개 렌즈, L = ${sig(P.L,3)} mm, n = ${P.n.toFixed(4)}`;
+  $("tbSub").textContent=t("tbSub",rows.length,sig(P.L,3),P.n.toFixed(4));
   $("tbody").innerHTML=rows.map(r=>`<tr data-f="${r.f}" aria-selected="${r.f===selF}">
     <td>${fmm(r.f)}${r.f===bestF?" ★":""}</td><td>${fx(r.wOut*1000,2)}</td><td>${sig(r.zRair,4)}</td><td>${sig(r.zRcr,4)}</td><td>${sig(r.xi,3)}</td>
     <td>${fx(r.dOut,2)}</td><td>${fx(r.front,2)}</td><td>${fx(2*r.wFace*1000,1)}</td><td class="c">${chips(r)}</td></tr>`).join("");
 }
-
 function select(f,from){
   selF=f;userPicked=true;userPicked2=false;
   renderReco();renderList();renderTable();renderDetail();
@@ -723,79 +989,79 @@ $("recoAlts").addEventListener("click",e=>{const b=e.target.closest("button");if
 function stat(k,v,u,s){return`<div class="stat"><div class="k">${k}</div><div class="v">${v}<small>${u}</small></div>${s?`<div class="s">${s}</div>`:""}</div>`;}
 function renderDetail(){
   const r=rows.find(x=>x.f===selF);if(!r)return;
-  $("detTitle").textContent=`f = ${fmm(r.f)} mm 렌즈`;
-  $("detChips").innerHTML=(r.f===bestF?'<span class="chip info">★ 추천</span> ':"")+chips(r);
+  $("detTitle").textContent=t("det1Title",fmm(r.f));
+  $("detChips").innerHTML=(r.f===bestF?`<span class="chip info">${t("chipBest")}</span> `:"")+chips(r);
   $("stats").innerHTML=
-    stat("집속 허리 반경 <span class='tex' data-tex='w_\\text{out}'>w<sub>out</sub></span>",fx(r.wOut*1000,2),"μm",`직경 ${fx(2*r.wOut*1000,1)} μm`)+
-    stat("레일리 길이 <span class='tex' data-tex='z_R'>z<sub>R</sub></span> (공기)",sig(r.zRair,4),"mm",`${sig(r.zRair/10,4)} cm`)+
-    stat("<span class='tex' data-tex='z_R^\\text{KTP}'><span class='tex' data-tex='z_R'>z<sub>R</sub></span><sup>KTP</sup></span> (결정 안)",sig(r.zRcr,4),"mm",`b = ${sig(r.b,4)} mm`)+
-    stat("집속 파라미터 <span class='tex' data-tex='\\xi = L/b'>ξ = L/b</span>",sig(r.xi,3),"",`목표 ${sig(P.xiT,3)}`)+
-    stat("근사식 <span class='tex' data-tex='f\\lambda/\\pi w_\\text{in}'>fλ/πw<sub>in</sub></span>",fx(r.wApprox*1000,2),"μm",`오차 ${r.approxErr>=0?"+":""}${fx(r.approxErr*100,2)}%`);
+    stat(t("sWout"),fx(r.wOut*1000,2),"μm",t("sWoutSub",fx(2*r.wOut*1000,1)))+
+    stat(t("sZR"),sig(r.zRair,4),"mm",`${sig(r.zRair/10,4)} cm`)+
+    stat(t("sZRK"),sig(r.zRcr,4),"mm",`b = ${sig(r.b,4)} mm`)+
+    stat(t("sXi"),sig(r.xi,3),"",t("sXiSub",sig(P.xiT,3)))+
+    stat(t("sApprox"),fx(r.wApprox*1000,2),"μm",t("sApproxSub",(r.approxErr>=0?"+":"")+fx(r.approxErr*100,2)));
   $("place").innerHTML=`
-    <dt>결정 앞면</dt><dd class="em">${fx(r.front,2)} mm</dd>
-    <dt>결정 중심 (허리)</dt><dd class="em">${fx(r.center,2)} mm</dd>
-    <dt>결정 뒷면</dt><dd>${fx(r.back,2)} mm</dd>
-    <dt>렌즈 초점 F</dt><dd>${fx(r.f,2)} mm</dd>
-    <dt>결정이 없을 때 허리 <span class='tex' data-tex='d_\\text{out}'>d<sub>out</sub></span></dt><dd>${fx(r.dOut,2)} mm</dd>
-    <dt>결정 때문에 허리가 밀리는 거리 <span class='tex' data-tex='\\Delta z'>Δz</span></dt><dd>+${fx(P.L/2*(1-1/P.n),2)} mm</dd>`;
+    <dt>${t("pFront")}</dt><dd class="em">${fx(r.front,2)} mm</dd>
+    <dt>${t("pCenter")}</dt><dd class="em">${fx(r.center,2)} mm</dd>
+    <dt>${t("pBack")}</dt><dd>${fx(r.back,2)} mm</dd>
+    <dt>${t("pF")}</dt><dd>${fx(r.f,2)} mm</dd>
+    <dt>${t("pDout")}</dt><dd>${fx(r.dOut,2)} mm</dd>
+    <dt>${t("pShift")}</dt><dd>+${fx(P.L/2*(1-1/P.n),2)} mm</dd>`;
   $("req").innerHTML=`
-    <dt>이 렌즈로 <span class='tex' data-tex='\\xi = 1'>ξ = 1</span>이 되는 결정 길이</dt><dd class="em">${sig(r.b,3)} mm</dd>
-    <dt>이 렌즈로 <span class='tex' data-tex='\\xi = 2.84'>ξ = 2.84</span>가 되는 결정 길이</dt><dd class="em">${sig(2.84*r.b,3)} mm</dd>
-    <dt>결정 면에서 빔 직경</dt><dd>${fx(2*r.wFace*1000,1)} μm</dd>
-    <dt>권장 최소 개구 <span class='tex' data-tex='\\approx 3\\,w_\\text{face}'>≈ 3w</span></dt><dd>${sig(3*r.wFace,3)} mm</dd>
-    <dt>${sig(P.apH,3)} × ${sig(P.apW,3)} mm 개구 투과율</dt><dd>${fx(r.T*100,3)}%</dd>
-    <dt>렌즈 위치의 빔 직경</dt><dd>${sig(2*r.wLens,4)} mm</dd>`;
-  drawLayout(r);drawZoom(r);
+    <dt>${t("rL1")}</dt><dd class="em">${sig(r.b,3)} mm</dd>
+    <dt>${t("rL284")}</dt><dd class="em">${sig(2.84*r.b,3)} mm</dd>
+    <dt>${t("rFace")}</dt><dd>${fx(2*r.wFace*1000,1)} μm</dd>
+    <dt>${t("rAp")}</dt><dd>${sig(3*r.wFace,3)} mm</dd>
+    <dt>${t("rT",sig(P.apH,3),sig(P.apW,3))}</dt><dd>${fx(r.T*100,3)}%</dd>
+    <dt>${t("rLens")}</dt><dd>${sig(2*r.wLens,4)} mm</dd>`;
+  $("svgLayout").innerHTML=layoutSVG(r);
+  const z=zoomSVG(r,true);$("svgZoom").innerHTML=z.s;zoomMap=z.map;
 }
 
-/* ---------- beam envelope (mm) at physical z from the lens ---------- */
+/* ---------- beam envelopes ---------- */
 function wAt(r,z){
   if(z<0)return P.win*Math.sqrt(1+((z+P.dIn)/r.zRin)**2);
   const zeq=z<r.front?z:z<=r.back?r.front+(z-r.front)/P.n:z-P.L*(1-1/P.n);
   return r.wOut*Math.sqrt(1+((zeq-r.dOut)/r.zRair)**2);
 }
-function envPath(r,z0,z1,X,Y,N){
+function envPath(fn,z0,z1,X,Y,N){
   const top=[],bot=[];
-  for(let i=0;i<=N;i++){const z=z0+(z1-z0)*i/N,w=wAt(r,z),x=X(z).toFixed(1);top.push(x+" "+Y(w).toFixed(1));bot.push(x+" "+Y(-w).toFixed(1));}
+  for(let i=0;i<=N;i++){const z=z0+(z1-z0)*i/N,w=fn(z),x=X(z).toFixed(1);top.push(x+" "+Y(w).toFixed(1));bot.push(x+" "+Y(-w).toFixed(1));}
   return {fill:"M"+top.join(" L")+" L"+bot.slice().reverse().join(" L")+" Z",top:"M"+top.join(" L"),bot:"M"+bot.join(" L")};
 }
 function niceStep(raw){const p=Math.pow(10,Math.floor(Math.log10(raw)));const m=raw/p;return (m<1.5?1:m<3.5?2:m<7.5?5:10)*p;}
+function dimLine(X,za,zb,y,label,c){const a=X(za),b=X(zb);return`<line x1="${a}" y1="${y}" x2="${b}" y2="${y}" stroke="${c}"/><line x1="${a}" y1="${y-5}" x2="${a}" y2="${y+5}" stroke="${c}"/><line x1="${b}" y1="${y-5}" x2="${b}" y2="${y+5}" stroke="${c}"/><text x="${(a+b)/2}" y="${y-6}" text-anchor="middle" class="m b" style="fill:${c}">${label}</text>`;}
+function lensShape(X,cy,Sc,z,w,label,anchor){const lx=X(z),lh=Math.min(88,Math.max(50,w*Sc*1.6));return `<path d="M${lx} ${cy-lh} Q${lx+9} ${cy} ${lx} ${cy+lh} Q${lx-9} ${cy} ${lx} ${cy-lh} Z" fill="var(--line)" stroke="var(--muted)"/><text x="${lx}" y="${cy-lh-8}" text-anchor="${anchor}" class="b">${label}</text>`;}
 
 function layoutSVG(r){
   const cy=112,x0=60,x1=870;
   const zEnd=Math.max(r.back,r.f,r.dOut)*1.12+5, zStart=-0.14*zEnd;
   const X=z=>x0+(z-zStart)/(zEnd-zStart)*(x1-x0);
   const maxR=Math.max(wAt(r,zStart),r.wLens,P.apH/2,wAt(r,zEnd))*1.08;
-  const S=84/maxR, Y=w=>cy-w*S;
-  const env=envPath(r,zStart,zEnd,X,Y,500);
+  const S_=84/maxR, Y=w=>cy-w*S_;
+  const env=envPath(z=>wAt(r,z),zStart,zEnd,X,Y,500);
   let s=`<line x1="${x0-20}" y1="${cy}" x2="${x1+10}" y2="${cy}" stroke="var(--line)" stroke-dasharray="4 4"/>`;
-  s+=`<rect x="${X(r.front)}" y="${Y(P.apH/2)}" width="${Math.max(1,X(r.back)-X(r.front))}" height="${P.apH*S}" fill="var(--crystal-soft)" stroke="var(--crystal)" stroke-width="1.2"/>`;
+  s+=`<rect x="${X(r.front)}" y="${Y(P.apH/2)}" width="${Math.max(1,X(r.back)-X(r.front))}" height="${P.apH*S_}" fill="var(--crystal-soft)" stroke="var(--crystal)" stroke-width="1.2"/>`;
   s+=`<path d="${env.fill}" fill="var(--beam-soft)"/><path d="${env.top}" fill="none" stroke="var(--beam)" stroke-width="1.4"/><path d="${env.bot}" fill="none" stroke="var(--beam)" stroke-width="1.4"/>`;
-  const lx=X(0), lh=Math.min(88,Math.max(56,r.wLens*S*1.5));
+  const lh=Math.min(88,Math.max(56,r.wLens*S_*1.5)), lx=X(0);
   s+=`<path d="M${lx} ${cy-lh} Q${lx+9} ${cy} ${lx} ${cy+lh} Q${lx-9} ${cy} ${lx} ${cy-lh} Z" fill="var(--line)" stroke="var(--muted)"/>`;
-  s+=`<text x="${lx}" y="${cy-lh-8}" text-anchor="middle" class="b">렌즈 f = ${fmm(r.f)} mm</text>`;
+  s+=`<text x="${lx}" y="${cy-lh-8}" text-anchor="middle" class="b">${t("svLens",fmm(r.f))}</text>`;
   s+=`<text x="${(X(r.front)+X(r.back))/2}" y="${Math.min(Y(P.apH/2)-8,cy-26)}" text-anchor="middle" class="b" style="fill:var(--crystal)">PPKTP ${sig(P.L,3)} mm</text>`;
   s+=`<line x1="${X(r.f)}" y1="${cy-6}" x2="${X(r.f)}" y2="${cy+6}" stroke="var(--fg)" stroke-width="1.5"/>`;
   s+=`<line x1="${X(r.center)}" y1="${cy-36}" x2="${X(r.center)}" y2="${cy+36}" stroke="var(--beam)" stroke-dasharray="3 3"/>`;
   s+=`<circle cx="${X(r.dOut)}" cy="${cy}" r="3.5" fill="var(--panel)" stroke="var(--muted)"/>`;
-  const ly=Math.min(186,Math.max(cy+40,Y(-P.apH/2)+18)), near=Math.abs(X(r.f)-X(r.dOut))<110;
-  s+=`<text x="${X(r.f)}" y="${ly}" text-anchor="middle">| 초점 F</text>`;
-  s+=`<text x="${X(r.dOut)}" y="${ly+(near?16:0)}" text-anchor="middle">○ 결정 없을 때 허리</text>`;
-  s+=`<text x="${X(zStart)+4}" y="${Y(-wAt(r,zStart))+16}" class="m">입사 2w = ${sig(2*P.win,3)} mm</text>`;
-  const dim=(za,zb,y,label,col)=>{const a=X(za),b=X(zb);return`<line x1="${a}" y1="${y}" x2="${b}" y2="${y}" stroke="${col}"/><line x1="${a}" y1="${y-5}" x2="${a}" y2="${y+5}" stroke="${col}"/><line x1="${b}" y1="${y-5}" x2="${b}" y2="${y+5}" stroke="${col}"/><text x="${(a+b)/2}" y="${y-6}" text-anchor="middle" class="m b" style="fill:${col}">${label}</text>`;};
-  s+=dim(0,r.front,230,`앞면까지 ${fx(r.front,1)} mm`,"var(--crystal)");
-  s+=dim(0,r.center,260,`결정 중심(허리)까지 ${fx(r.center,1)} mm`,"var(--muted)");
+  const ly=Math.min(186,Math.max(cy+40,Y(-P.apH/2)+18)), near=Math.abs(X(r.f)-X(r.dOut))<130;
+  s+=`<text x="${X(r.f)}" y="${ly}" text-anchor="middle">${t("svFocus")}</text>`;
+  s+=`<text x="${X(r.dOut)}" y="${ly+(near?16:0)}" text-anchor="middle">${t("svNoCrystal")}</text>`;
+  s+=`<text x="${X(zStart)+4}" y="${Y(-wAt(r,zStart))+16}" class="m">${t("svInput",sig(2*P.win,3))}</text>`;
+  s+=dimLine(X,0,r.front,230,t("svToFront",fx(r.front,1)),"var(--crystal)");
+  s+=dimLine(X,0,r.center,260,t("svToCenter",fx(r.center,1)),"var(--muted)");
   return s;
 }
-function drawLayout(r){$("svgLayout").innerHTML=layoutSVG(r);}
-
 function zoomSVG(r,interactive){
   const x0=70,x1=870,cy=118;
   const pad=Math.max(P.L*0.3,r.zRcr*0.3), z0=r.front-pad, z1=r.back+pad;
   const X=z=>x0+(z-z0)/(z1-z0)*(x1-x0);
   let maxW=0;for(let i=0;i<=200;i++)maxW=Math.max(maxW,wAt(r,z0+(z1-z0)*i/200));
-  maxW*=1.15;const S=88/maxW, Y=w=>cy-w*S;
-  const env=envPath(r,z0,z1,X,Y,400);
+  maxW*=1.15;const S_=88/maxW, Y=w=>cy-w*S_;
+  const env=envPath(z=>wAt(r,z),z0,z1,X,Y,400);
   let s=`<rect x="${X(r.front)}" y="${cy-96}" width="${X(r.back)-X(r.front)}" height="192" fill="var(--crystal-soft)"/>`;
   const ba=Math.max(z0,r.center-r.zRcr), bb=Math.min(z1,r.center+r.zRcr);
   s+=`<rect x="${X(ba)}" y="${cy-96}" width="${X(bb)-X(ba)}" height="192" fill="var(--beam-band)"/>`;
@@ -806,29 +1072,28 @@ function zoomSVG(r,interactive){
   s+=`<path d="${env.fill}" fill="var(--beam-soft)"/><path d="${env.top}" fill="none" stroke="var(--beam)" stroke-width="1.6"/><path d="${env.bot}" fill="none" stroke="var(--beam)" stroke-width="1.6"/>`;
   s+=`<line x1="${X(r.center)}" y1="${Y(r.wOut)}" x2="${X(r.center)}" y2="${Y(-r.wOut)}" stroke="var(--fg)" stroke-width="1.2"/>`;
   if(X(bb)-X(ba)>90)s+=`<text x="${(X(ba)+X(bb))/2}" y="${cy+88}" text-anchor="middle" style="fill:var(--beam)">b = ${sig(r.b,3)} mm</text>`;
-  if(X(r.center)-X(r.front)>120)s+=`<text x="${X(r.front)+6}" y="${cy-82}" class="m">면 2w = ${fx(2*r.wFace*1000,1)} μm</text>`;
+  if(X(r.center)-X(r.front)>120)s+=`<text x="${X(r.front)+6}" y="${cy-82}" class="m">${t("svFace",fx(2*r.wFace*1000,1))}</text>`;
   const ap=P.apH/2;
   if(ap<maxW)s+=`<line x1="${X(r.front)}" y1="${Y(ap)}" x2="${X(r.back)}" y2="${Y(ap)}" stroke="var(--crystal)" stroke-width="2"/><line x1="${X(r.front)}" y1="${Y(-ap)}" x2="${X(r.back)}" y2="${Y(-ap)}" stroke="var(--crystal)" stroke-width="2"/>`;
-  else s+=`<text x="${X(r.back)-6}" y="${cy-82}" text-anchor="end" style="fill:var(--crystal)">결정 두께 ±${sig(ap,3)} mm (화면 밖)</text>`;
+  else s+=`<text x="${X(r.back)-6}" y="${cy-82}" text-anchor="end" style="fill:var(--crystal)">${t("svOff",sig(ap,3))}</text>`;
   const xs=niceStep((z1-z0)/6);
   for(let v=Math.ceil(z0/xs)*xs;v<=z1;v+=xs)s+=`<text x="${X(v)}" y="${cy+140}" text-anchor="middle" class="m">${sig(v,4)}</text>`;
   s+=`<text x="${X(r.center)}" y="${cy+114}" text-anchor="middle" class="b m">2w₀ = ${fx(2*r.wOut*1000,1)} μm @ ${fx(r.center,1)} mm</text>`;
   if(interactive){s+=`<rect x="${x0}" y="${cy-100}" width="${x1-x0}" height="200" fill="transparent"/>`;
-  s+=`<g id="hover" style="pointer-events:none" visibility="hidden"><line id="hvL" y1="${cy-96}" y2="${cy+96}" stroke="var(--fg)" stroke-width="1" stroke-dasharray="2 2"/><rect id="hvB" y="${cy-118}" height="20" rx="4" fill="var(--panel)" stroke="var(--line)"/><text id="hvT" y="${cy-104}" class="m b" text-anchor="middle"></text></g>`;}
+    s+=`<g id="hover" style="pointer-events:none" visibility="hidden"><line id="hvL" y1="${cy-96}" y2="${cy+96}" stroke="var(--fg)" stroke-width="1" stroke-dasharray="2 2"/><rect id="hvB" y="${cy-118}" height="20" rx="4" fill="var(--panel)" stroke="var(--line)"/><text id="hvT" y="${cy-104}" class="m b" text-anchor="middle"></text></g>`;}
   return {s,map:{x0,x1,z0,z1,r}};
 }
-function drawZoom(r){const z=zoomSVG(r,true);$("svgZoom").innerHTML=z.s;zoomMap=z.map;}
 function hover(e){
   if(!zoomMap)return;const svg=$("svgZoom"),m=svg.getScreenCTM();if(!m)return;
   const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const p=pt.matrixTransform(m.inverse());
-  const {x0,x1,z0,z1,r}=zoomMap, g=$("hover");
+  const {x0,x1,z0,z1,r}=zoomMap, g=$("hover");if(!g)return;
   if(p.x<x0||p.x>x1){g.setAttribute("visibility","hidden");return;}
   const z=z0+(p.x-x0)/(x1-x0)*(z1-z0), w=wAt(r,z);
-  const label=`z = ${fx(z,2)} mm · 2w = ${fx(2*w*1000,1)} μm${z>=r.front&&z<=r.back?" · 결정 안":""}`;
-  const bw=label.length*7.2+18, tx=Math.min(x1-bw/2,Math.max(x0+bw/2,p.x));
+  const label=`z = ${fx(z,2)} mm · 2w = ${fx(2*w*1000,1)} μm${z>=r.front&&z<=r.back?t("svInCrystal"):""}`;
+  const bw=label.length*7.2+18, tx_=Math.min(x1-bw/2,Math.max(x0+bw/2,p.x));
   $("hvL").setAttribute("x1",p.x);$("hvL").setAttribute("x2",p.x);
-  $("hvT").setAttribute("x",tx);$("hvT").textContent=label;
-  $("hvB").setAttribute("x",tx-bw/2);$("hvB").setAttribute("width",bw);
+  $("hvT").setAttribute("x",tx_);$("hvT").textContent=label;
+  $("hvB").setAttribute("x",tx_-bw/2);$("hvB").setAttribute("width",bw);
   g.setAttribute("visibility","visible");
 }
 $("svgZoom").addEventListener("pointermove",hover);
@@ -837,26 +1102,26 @@ $("svgZoom").addEventListener("pointerleave",()=>{const g=$("hover");if(g)g.setA
 /* ---------- stage 2: collimating lens ---------- */
 function source(r1){
   const lamAuto=$("lamSMode").value==="auto", nAuto=$("nSMode").value==="auto";
-  if(lamAuto){$("lamS").value=+(2*P.lam).toFixed(4);}
+  if(lamAuto)$("lamS").value=+(2*P.lam).toFixed(4);
   $("lamS").readOnly=lamAuto;
   const lamS=+$("lamS").value;
-  if(nAuto&&lamS>0){$("nS").value=nKTPy(lamS/1000).toFixed(4);}
+  if(nAuto&&lamS>0)$("nS").value=nKTPy(lamS/1000).toFixed(4);
   $("nS").readOnly=nAuto;
   const nS=+$("nS").value, ma=$("modeAssume").value;
   $("wsBox").hidden=ma!=="manual";
-  if($("src").value==="pump")return {kind:"pump",name:"펌프",lam:P.lam,n:P.n,m2:P.m2,w0:r1.wOut};
+  if($("src").value==="pump")return {kind:"pump",name:t("pump"),lam:P.lam,n:P.n,m2:P.m2,w0:r1.wOut};
   const w0=ma==="sameb"?r1.wOut*Math.sqrt(lamS*P.n/(P.lam*nS)):ma==="samew"?r1.wOut:(+$("wsManual").value)/1000;
-  return {kind:"spdc",name:"SPDC 광자",lam:lamS,n:nS,m2:1,w0};
+  return {kind:"spdc",name:t("spdc"),lam:lamS,n:nS,m2:1,w0};
 }
-function compute2(r1,S,f2,D,Dt){
-  const le=S.lam*1e-6*S.m2, zR=Math.PI*S.w0*S.w0/le;
-  const zApp=r1.back-P.L/(2*S.n);
+function compute2(r1,Sx,f2,D,Dt){
+  const le=Sx.lam*1e-6*Sx.m2, zR=Math.PI*Sx.w0*Sx.w0/le;
+  const zApp=r1.back-P.L/(2*Sx.n);
   let x=0, reach=true;
   const a=(D>0)?D-f2:0;
   if(Math.abs(a)>1e-9){const disc=f2**4-4*a*a*zR*zR;if(disc<0){reach=false;x=zR*Math.sign(a);}else x=(f2*f2-Math.sqrt(disc))/(2*a);}
   const d=f2+x, z2=zApp+d, gap=z2-r1.back, den=x*x+zR*zR;
-  const wP=S.w0*f2/Math.sqrt(den), outW=f2+f2*f2*x/den, zRp=Math.PI*wP*wP/le, theta=le/(Math.PI*wP);
-  const wLens=S.w0*Math.sqrt(1+(d/zR)**2), w1m=wP*Math.sqrt(1+((1000-outW)/zRp)**2);
+  const wP=Sx.w0*f2/Math.sqrt(den), outW=f2+f2*f2*x/den, zRp=Math.PI*wP*wP/le, theta=le/(Math.PI*wP);
+  const wLens=Sx.w0*Math.sqrt(1+(d/zR)**2), w1m=wP*Math.sqrt(1+((1000-outW)/zRp)**2);
   const r={f:f2,zR,zApp,x,d,z2,gap,wP,outW,zRp,theta,wLens,w1m,reach,ratio:2*wP/Dt};
   r.gapOK=gap>=P.minGap; r.ok=r.gapOK&&reach;
   r.level=gap<0?"bad":(!r.ok?"warn":"");
@@ -864,19 +1129,19 @@ function compute2(r1,S,f2,D,Dt){
 }
 function problems2(r){
   const p=[];
-  if(r.gap<0)p.push(["bad","결정과 겹침"]);else if(!r.gapOK)p.push(["warn","간격 부족"]);
-  if(!r.reach)p.push(["warn","허리 위치 도달 불가"]);
+  if(r.gap<0)p.push(["bad",t("p2Overlap")]);else if(!r.gapOK)p.push(["warn",t("pGap")]);
+  if(!r.reach)p.push(["warn",t("p2Reach")]);
   return p;
 }
-function fitChip(r){const q=r.ratio;if(q>1.3)return["목표보다 큼","info"];if(q<1/1.3)return["목표보다 작음","info"];return["목표 근처","good"];}
-function chips2(r){const [t,c]=fitChip(r);return `<span class="chip ${c}">${t}</span> `+problems2(r).map(([c,t])=>`<span class="chip ${c}">${t}</span>`).join(" ");}
+function fitChip(r){const q=r.ratio;if(q>1.3)return[t("fitBig"),"info"];if(q<1/1.3)return[t("fitSmall"),"info"];return[t("fitOk"),"good"];}
+function chips2(r){const [tt,c]=fitChip(r);return `<span class="chip ${c}">${tt}</span> `+problems2(r).map(([c,tt])=>`<span class="chip ${c}">${tt}</span>`).join(" ");}
 function validate2(){
   const Dt=+$("dTarget").value, D=$("outPos").value.trim();
-  if(!(Dt>0))return"목표 평행광 직경을 0보다 크게 입력하세요.";
-  if(D!==""&&!(+D>0))return"평행광 허리 위치는 비우거나 0보다 큰 값을 넣으세요.";
-  if(!(+$("lamS").value>0))return"SPDC 파장을 0보다 크게 입력하세요.";
-  if(!(+$("nS").value>=1))return"SPDC 굴절률은 1 이상이어야 합니다.";
-  if($("modeAssume").value==="manual"&&!(+$("wsManual").value>0))return"SPDC 허리 반경을 0보다 크게 입력하세요.";
+  if(!(Dt>0))return t("e2D");
+  if(D!==""&&!(+D>0))return t("e2Pos");
+  if(!(+$("lamS").value>0))return t("e2Lam");
+  if(!(+$("nS").value>=1))return t("e2N");
+  if($("modeAssume").value==="manual"&&!(+$("wsManual").value>0))return t("e2W");
   return"";
 }
 function stage2Rows(r1){
@@ -891,82 +1156,80 @@ function syncControls2(){
   document.querySelectorAll("#srcSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===sv));
   const dt=+$("dTarget").value, din=+(2*P.win).toPrecision(4);
   document.querySelectorAll("#dPresets button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v==="in"?Math.abs(dt-din)<1e-9:+b.dataset.v===dt));
-  $("dPresets").querySelector('[data-v="in"]').textContent=`입사와 같게 (${sig(din,3)})`;
+  $("dPresets").querySelector('[data-v="in"]').textContent=t("dIn",sig(din,3));
 }
+let st2=null;
 function run2(){
   if(!P||!rows.length)return;
   R1=rows.find(r=>r.f===selF);if(!R1)return;
   syncControls2();
   const err=validate2();$("in2Err").textContent=err;
-  $("s2ctx").textContent=`1단계에서 고른 f = ${fmm(R1.f)} mm 집속 렌즈 기준`;
-  if(err){source(R1);$("reco2Eyebrow").textContent="입력 확인";$("reco2Title").textContent=err;$("reco2Text").textContent="";$("reco2Alts").innerHTML="";return;}
+  $("s2ctx").textContent=t("s2ctx",fmm(R1.f));
+  if(err){source(R1);st2=null;$("reco2Eyebrow").textContent=t("inputCheck");$("reco2Title").textContent=err;$("reco2Text").textContent="";$("reco2Alts").innerHTML="";return;}
   save();
-  const st=stage2Rows(R1);S=st.Src;rows2=st.rr;bestF2=st.best.f;
+  st2=stage2Rows(R1);S=st2.Src;rows2=st2.rr;bestF2=st2.best.f;
   if(!userPicked2||!rows2.some(r=>r.f===selF2))selF2=bestF2;
-  $("srcHint").innerHTML=S.kind==="spdc"
-    ?`λ<sub>s</sub> = ${sig(S.lam,5)} nm, 결정 안 허리 반경 ${fx(S.w0*1000,1)} μm (${{sameb:"펌프와 같은 b",samew:"펌프와 같은 허리",manual:"직접 입력"}[$("modeAssume").value]})`
-    :`λ = ${sig(S.lam,5)} nm, 결정 안 허리 반경 ${fx(S.w0*1000,1)} μm`;
-  renderReco2(st);renderList2();renderDetail2();
+  $("srcHint").innerHTML=S.kind==="spdc"?t("srcHintS",sig(S.lam,5),fx(S.w0*1000,1),t("assume")[$("modeAssume").value]):t("srcHintP",sig(S.lam,5),fx(S.w0*1000,1));
+  renderReco2();renderList2();renderDetail2();
   typesetIn(document.body);
 }
-function renderReco2(st){
+function renderReco2(){
   const b=rows2.find(r=>r.f===bestF2);
-  const hasD=st.D>0;
-  if(!st.okAny){
-    $("reco2Eyebrow").textContent="조건을 모두 만족하는 렌즈가 없습니다";
-    $("reco2Title").innerHTML=`가장 가까운 후보는 <span class="mono">f = ${fmm(b.f)} mm</span>`;
-    $("reco2Text").innerHTML=`${problems2(b).map(p=>p[1]).join(", ")||"조건 미충족"}. 1단계 고급 설정의 최소 간격이나 후보 렌즈 범위, 평행광 허리 위치를 바꿔 보세요.`;
+  if(!st2.okAny){
+    $("reco2Eyebrow").textContent=t("noneOk");
+    $("reco2Title").innerHTML=t("closest",fmm(b.f));
+    $("reco2Text").innerHTML=`${problems2(b).map(p=>p[1]).join(", ")||t("notMet")}. ${t("noneOk2Hint")}`;
   }else{
-    $("reco2Eyebrow").textContent=`평행광 렌즈 추천 · ${S.name} · 목표 직경 ${sig(st.Dt,3)} mm`;
-    $("reco2Title").innerHTML=`<span class="mono">f = ${fmm(b.f)} mm</span> 렌즈를 결정 뒷면에서 <span class="mono">${fx(b.gap,1)} mm</span>에`;
+    $("reco2Eyebrow").textContent=t("reco2Eyebrow",S.name,sig(st2.Dt,3));
+    $("reco2Title").innerHTML=t("reco2Title",fmm(b.f),fx(b.gap,1));
     const q=b.ratio;
-    $("reco2Text").innerHTML=`집속 렌즈에서 <span class="mono">${fx(b.z2,1)} mm</span> 위치입니다. 평행광 직경 <span class="mono">${fx(2*b.wP,2)} mm</span>, 발산 반각 <span class="mono">${fx(b.theta*1000,2)} mrad</span>, 평행 유지 거리 <span class="tex" data-tex="z_R^{\\prime}">z<sub>R</sub>′</span> = <span class="mono">${fmtLen(b.zRp)}</span>, 렌즈 위치 허용 <span class="mono">±${sig(b.zR,2)} mm</span>${hasD?`, 출력 허리는 렌즈 뒤 <span class="mono">${fx(b.outW,0)} mm</span>`:""}${Math.abs(Math.log(q))>Math.log(1.3)?`. 후보 간격이 넓어 목표보다 ${q>1?"큽니다":"작습니다"}`:""}.`;
+    $("reco2Text").innerHTML=t("reco2Text",fx(b.z2,1),fx(2*b.wP,2),fx(b.theta*1000,2),fmtLen(b.zRp),sig(b.zR,2),st2.D>0?fx(b.outW,0):"",Math.abs(Math.log(q))>Math.log(1.3)?q:0);
   }
   const i=rows2.findIndex(r=>r.f===bestF2), near=[rows2[i-1],rows2[i+1]].filter(Boolean);
-  let html=near.length?`<span>이웃 렌즈</span>`+near.map(r=>`<button type="button" data-f="${r.f}">f ${fmm(r.f)} · ${fx(2*r.wP,2)} mm</button>`).join(""):"";
-  if(selF2!==bestF2)html=`<button type="button" data-f="${bestF2}">추천 렌즈로 돌아가기</button>`+html;
+  let html=near.length?`<span>${t("neighbours")}</span>`+near.map(r=>`<button type="button" data-f="${r.f}">f ${fmm(r.f)} · ${fx(2*r.wP,2)} mm</button>`).join(""):"";
+  if(selF2!==bestF2)html=`<button type="button" data-f="${bestF2}">${t("backToBest")}</button>`+html;
   $("reco2Alts").innerHTML=html;
 }
-function fmtLen(mm){return mm>=1000?`${sig(mm/1000,3)} m`:`${sig(mm,3)} mm`;}
 const D_LO=0.05, D_HI=20;
 function dPos(v){const c=Math.min(D_HI,Math.max(D_LO,v));return +(Math.log(c/D_LO)/Math.log(D_HI/D_LO)*100).toFixed(1);}
 function renderList2(){
   const only=$("onlyOK2").checked, Dt=+$("dTarget").value;
   const shown=rows2.filter(r=>!only||r.ok||r.f===selF2);
-  $("list2Count").textContent=`${shown.length}${only?` / ${rows2.length}`:""}개`;
+  $("list2Count").textContent=t("count",shown.length,only?rows2.length:0);
   const z0=dPos(Dt/1.3),z1=dPos(Dt*1.3),tg=dPos(Dt);
   $("list2").innerHTML=shown.map(r=>{
     const pr=problems2(r).map(p=>p[1]).join(", ");
     return `<button type="button" class="lrow${r.ok?"":" dim"}" role="option" id="opt2-${r.f}" data-f="${r.f}" aria-selected="${r.f===selF2}">
-      <span class="f">${fmm(r.f)}${r.f===bestF2?'<span class="star" aria-label="추천">★</span>':""}</span>
+      <span class="f">${fmm(r.f)}${r.f===bestF2?`<span class="star" aria-label="${t("recommended")}">★</span>`:""}</span>
       <span>${fx(r.gap,1)}</span><span>${fx(r.theta*1000,2)}</span>
       <span class="xi"><span class="xv">${fx(2*r.wP,2)}</span><span class="bar"><span class="zone" style="left:${z0}%;width:${(z1-z0).toFixed(1)}%"></span><span class="tgt" style="left:${tg}%"></span><span class="dot" style="left:${dPos(2*r.wP)}%"></span></span></span>
       <span class="flag ${r.level}" title="${pr}">${pr?`<span class="sr">${pr}</span>`:""}</span></button>`;}).join("");
 }
 function renderDetail2(){
   const r=rows2.find(x=>x.f===selF2);if(!r)return;
-  $("det2Title").textContent=`f = ${fmm(r.f)} mm 평행광 렌즈`;
-  $("det2Chips").innerHTML=(r.f===bestF2?'<span class="chip spdc">★ 추천</span> ':"")+chips2(r);
+  const L_=fmtLen(r.zRp).split(" ");
+  $("det2Title").textContent=t("det2Title",fmm(r.f));
+  $("det2Chips").innerHTML=(r.f===bestF2?`<span class="chip spdc">${t("chipBest")}</span> `:"")+chips2(r);
   $("stats2").innerHTML=
-    stat("평행광 직경 2<span class='tex' data-tex='w^{\\prime}'>w′</span>",fx(2*r.wP,3),"mm",`목표 ${sig(+$("dTarget").value,3)} mm`)+
-    stat("발산 반각 <span class='tex' data-tex='\\theta'>θ</span>",fx(r.theta*1000,3),"mrad",`1 m 뒤 직경 ${fx(2*r.w1m,2)} mm`)+
-    stat("평행 유지 거리 <span class='tex' data-tex='z_R^{\\prime}'>z<sub>R</sub>′</span>",fmtLen(r.zRp).split(" ")[0],fmtLen(r.zRp).split(" ")[1],`출력 허리: 렌즈 뒤 ${fx(r.outW,0)} mm`)+
-    stat("결정 뒷면 → 렌즈",fx(r.gap,2),"mm",`집속 렌즈에서 ${fx(r.z2,1)} mm`)+
-    stat("렌즈 위치 허용",`±${sig(r.zR,2)}`,"mm",`겉보기 허리의 z<sub>R</sub>`);
+    stat(t("s2D"),fx(2*r.wP,3),"mm",t("s2DSub",sig(+$("dTarget").value,3)))+
+    stat(t("s2Th"),fx(r.theta*1000,3),"mrad",t("s2ThSub",fx(2*r.w1m,2)))+
+    stat(t("s2ZR"),L_[0],L_[1],t("s2ZRSub",fx(r.outW,0)))+
+    stat(t("s2Gap"),fx(r.gap,2),"mm",t("s2GapSub",fx(r.z2,1)))+
+    stat(t("s2Tol"),`±${sig(r.zR,2)}`,"mm",t("s2TolSub"));
   $("place2").innerHTML=`
-    <dt>집속 렌즈에서 평행광 렌즈까지</dt><dd class="em">${fx(r.z2,2)} mm</dd>
-    <dt>결정 뒷면에서 평행광 렌즈까지</dt><dd class="em">${fx(r.gap,2)} mm</dd>
-    <dt>겉보기 허리에서 렌즈까지 <span class='tex' data-tex='d_2'>d₂</span></dt><dd>${fx(r.d,2)} mm</dd>
-    <dt>겉보기 허리 위치 (집속 렌즈 기준)</dt><dd>${fx(r.zApp,2)} mm</dd>
-    <dt>출력 허리 위치 (평행광 렌즈 뒤)</dt><dd>${fx(r.outW,1)} mm</dd>
-    <dt>렌즈 위치 허용 범위</dt><dd>±${sig(r.zR,3)} mm</dd>`;
+    <dt>${t("q1")}</dt><dd class="em">${fx(r.z2,2)} mm</dd>
+    <dt>${t("q2")}</dt><dd class="em">${fx(r.gap,2)} mm</dd>
+    <dt>${t("q3")}</dt><dd>${fx(r.d,2)} mm</dd>
+    <dt>${t("q4")}</dt><dd>${fx(r.zApp,2)} mm</dd>
+    <dt>${t("q5")}</dt><dd>${fx(r.outW,1)} mm</dd>
+    <dt>${t("q6")}</dt><dd>±${sig(r.zR,3)} mm</dd>`;
   $("beam2").innerHTML=`
-    <dt>평행광으로 만들 빛</dt><dd>${S.name} ${sig(S.lam,5)} nm</dd>
-    <dt>결정 안 허리 반경 <span class='tex' data-tex='w_0'>w₀</span></dt><dd>${fx(S.w0*1000,2)} μm</dd>
-    <dt>공기 중 레일리 길이 <span class='tex' data-tex='z_R'>z<sub>R</sub></span></dt><dd>${sig(r.zR,4)} mm</dd>
-    <dt>평행광 렌즈 위치의 빔 직경</dt><dd>${fx(2*r.wLens,3)} mm</dd>
-    <dt>이 빛으로 목표 직경을 주는 이상적 f</dt><dd>${sig(Math.PI*S.w0*(+$("dTarget").value/2)/(S.lam*1e-6*S.m2),3)} mm</dd>
-    <dt>결정 굴절률 (이 빛)</dt><dd>${S.n.toFixed(4)}</dd>`;
+    <dt>${t("b1")}</dt><dd>${S.name} ${sig(S.lam,5)} nm</dd>
+    <dt>${t("b2")}</dt><dd>${fx(S.w0*1000,2)} μm</dd>
+    <dt>${t("b3")}</dt><dd>${sig(r.zR,4)} mm</dd>
+    <dt>${t("b4")}</dt><dd>${fx(2*r.wLens,3)} mm</dd>
+    <dt>${t("b5")}</dt><dd>${sig(Math.PI*S.w0*(+$("dTarget").value/2)/(S.lam*1e-6*S.m2),3)} mm</dd>
+    <dt>${t("b6")}</dt><dd>${S.n.toFixed(4)}</dd>`;
   $("svgSystem").innerHTML=systemSVG(R1,r,S);
   $("svgCol").innerHTML=colSVG(r);
 }
@@ -982,22 +1245,19 @@ function systemSVG(r1,r2,Sx){
   const maxR=Math.max(wAt(r1,zStart),r1.wLens,r2.wLens,w2At(r1,r2,Sx,zEnd),P.apH/2)*1.1;
   const Sc=84/maxR, Y=w=>cy-w*Sc;
   const col=Sx.kind==="spdc"?"var(--spdc)":"var(--beam)", colSoft=Sx.kind==="spdc"?"var(--spdc-soft)":"var(--beam-soft)";
-  const path=(fn,a,b,N)=>{const t=[],u=[];for(let i=0;i<=N;i++){const z=a+(b-a)*i/N,w=fn(z),x=X(z).toFixed(1);t.push(x+" "+Y(w).toFixed(1));u.push(x+" "+Y(-w).toFixed(1));}return{fill:"M"+t.join(" L")+" L"+u.slice().reverse().join(" L")+" Z",top:"M"+t.join(" L"),bot:"M"+u.join(" L")};};
   let s=`<line x1="${x0-20}" y1="${cy}" x2="${x1+10}" y2="${cy}" stroke="var(--line)" stroke-dasharray="4 4"/>`;
   s+=`<rect x="${X(r1.front)}" y="${Y(P.apH/2)}" width="${Math.max(1,X(r1.back)-X(r1.front))}" height="${P.apH*Sc}" fill="var(--crystal-soft)" stroke="var(--crystal)" stroke-width="1.2"/>`;
-  const pe=path(z=>wAt(r1,z),zStart,r1.back,400);
+  const pe=envPath(z=>wAt(r1,z),zStart,r1.back,X,Y,400);
   s+=`<path d="${pe.fill}" fill="var(--beam-soft)"/><path d="${pe.top}" fill="none" stroke="var(--beam)" stroke-width="1.4"/><path d="${pe.bot}" fill="none" stroke="var(--beam)" stroke-width="1.4"/>`;
-  const se=path(z=>w2At(r1,r2,Sx,z),r1.center,zEnd,500);
+  const se=envPath(z=>w2At(r1,r2,Sx,z),r1.center,zEnd,X,Y,500);
   s+=`<path d="${se.fill}" fill="${colSoft}"/><path d="${se.top}" fill="none" stroke="${col}" stroke-width="1.4"/><path d="${se.bot}" fill="none" stroke="${col}" stroke-width="1.4"/>`;
-  const lens=(z,w,label,anchor)=>{const lx=X(z),lh=Math.min(88,Math.max(50,w*Sc*1.6));return `<path d="M${lx} ${cy-lh} Q${lx+9} ${cy} ${lx} ${cy+lh} Q${lx-9} ${cy} ${lx} ${cy-lh} Z" fill="var(--line)" stroke="var(--muted)"/><text x="${lx}" y="${cy-lh-8}" text-anchor="${anchor}" class="b">${label}</text>`;};
-  s+=lens(0,r1.wLens,`집속 렌즈 f = ${fmm(r1.f)} mm`,"start");
-  s+=lens(r2.z2,r2.wLens,`평행광 렌즈 f = ${fmm(r2.f)} mm`,X(r2.z2)>700?"end":"middle");
+  s+=lensShape(X,cy,Sc,0,r1.wLens,t("svL1",fmm(r1.f)),"start");
+  s+=lensShape(X,cy,Sc,r2.z2,r2.wLens,t("svL2",fmm(r2.f)),X(r2.z2)>700?"end":"middle");
   s+=`<text x="${(X(r1.front)+X(r1.back))/2}" y="${Math.min(Y(P.apH/2)-8,cy-26)}" text-anchor="middle" class="b" style="fill:var(--crystal)">PPKTP</text>`;
   s+=`<text x="${X(zEnd)-4}" y="${Y(-w2At(r1,r2,Sx,zEnd))+16}" text-anchor="end" class="m" style="fill:${col}">2w′ = ${fx(2*r2.wP,2)} mm</text>`;
-  const dim=(za,zb,y,label,c)=>{const a=X(za),b=X(zb);return`<line x1="${a}" y1="${y}" x2="${b}" y2="${y}" stroke="${c}"/><line x1="${a}" y1="${y-5}" x2="${a}" y2="${y+5}" stroke="${c}"/><line x1="${b}" y1="${y-5}" x2="${b}" y2="${y+5}" stroke="${c}"/><text x="${(a+b)/2}" y="${y-6}" text-anchor="middle" class="m b" style="fill:${c}">${label}</text>`;};
-  s+=dim(0,r1.front,214,`결정 앞면 ${fx(r1.front,1)} mm`,"var(--crystal)");
-  s+=dim(r1.back,r2.z2,242,`결정 뒷면→렌즈 ${fx(r2.gap,1)} mm`,col);
-  s+=dim(0,r2.z2,270,`집속 렌즈→평행광 렌즈 ${fx(r2.z2,1)} mm`,"var(--muted)");
+  s+=dimLine(X,0,r1.front,214,t("svFront2",fx(r1.front,1)),"var(--crystal)");
+  s+=dimLine(X,r1.back,r2.z2,242,t("svGap2",fx(r2.gap,1)),col);
+  s+=dimLine(X,0,r2.z2,270,t("svTotal",fx(r2.z2,1)),"var(--muted)");
   return s;
 }
 function colSVG(r){
@@ -1013,13 +1273,13 @@ function colSVG(r){
   s+=`<text x="${x0-8}" y="${y0-6}" text-anchor="end">mm</text>`;
   const a=Math.max(0,r.outW-r.zRp), b=Math.min(Xmax,r.outW+r.zRp);
   if(b>a)s+=`<rect x="${X(a)}" y="${y0}" width="${X(b)-X(a)}" height="${y1-y0}" fill="${band}" opacity=".7"/>`;
-  s+=`<line x1="${x0}" x2="${x1}" y1="${Y(Dt)}" y2="${Y(Dt)}" stroke="var(--muted)" stroke-dasharray="5 4"/><text x="${x1}" y="${Y(Dt)-6}" text-anchor="end">목표 ${sig(Dt,3)} mm</text>`;
+  s+=`<line x1="${x0}" x2="${x1}" y1="${Y(Dt)}" y2="${Y(Dt)}" stroke="var(--muted)" stroke-dasharray="5 4"/><text x="${x1}" y="${Y(Dt)-6}" text-anchor="end">${t("svTarget",sig(Dt,3))}</text>`;
   let d="";for(let i=0;i<=300;i++){const z=Xmax*i/300;d+=(i?"L":"M")+X(z).toFixed(1)+" "+Y(2*r.wP*Math.sqrt(1+((z-r.outW)/r.zRp)**2)).toFixed(1);}
   s+=`<path d="${d}" fill="none" stroke="${col}" stroke-width="2"/>`;
-  if(r.outW>0&&r.outW<Xmax)s+=`<line x1="${X(r.outW)}" x2="${X(r.outW)}" y1="${y0}" y2="${y1}" stroke="${col}" stroke-dasharray="2 3"/><text x="${X(r.outW)+5}" y="${y0+12}" style="fill:${col}">출력 허리</text>`;
+  if(r.outW>0&&r.outW<Xmax)s+=`<line x1="${X(r.outW)}" x2="${X(r.outW)}" y1="${y0}" y2="${y1}" stroke="${col}" stroke-dasharray="2 3"/><text x="${X(r.outW)+5}" y="${y0+12}" style="fill:${col}">${t("svOutWaist")}</text>`;
   const xs=niceStep(Xmax/6);
   for(let v=0;v<=Xmax+1e-9;v+=xs)s+=`<text x="${X(v)}" y="${y1+18}" text-anchor="middle" class="m">${sig(v,4)}</text>`;
-  s+=`<text x="${(x0+x1)/2}" y="${y1+38}" text-anchor="middle">평행광 렌즈 뒤 거리 (mm)</text>`;
+  s+=`<text x="${(x0+x1)/2}" y="${y1+38}" text-anchor="middle">${t("svColAxis")}</text>`;
   return s;
 }
 function select2(f,from){
@@ -1038,120 +1298,115 @@ $("list2").addEventListener("keydown",e=>{
   if(btns[j]){e.preventDefault();select2(+btns[j].dataset.f,"key");}
 });
 $("reco2Alts").addEventListener("click",e=>{const b=e.target.closest("button");if(b)select2(+b.dataset.f,"click");});
-$("srcSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;$("src").value=b.dataset.v;userPicked2=false;run2();});
-$("dPresets").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;$("dTarget").value=b.dataset.v==="in"?+(2*P.win).toPrecision(4):b.dataset.v;userPicked2=false;run2();});
-$("adv2").addEventListener("toggle",save);
 
 /* ---------- copy ---------- */
 $("copyBtn").addEventListener("click",()=>{
   const r=rows.find(x=>x.f===selF);if(!r)return;
-  const txt=[`PPKTP 집속 계산: λ = ${P.lam} nm, w_in = ${sig(P.win,4)} mm (반경, 1/e²), L = ${sig(P.L,3)} mm, n = ${P.n.toFixed(4)}, M² = ${P.m2}`,
-    `렌즈 f = ${fmm(r.f)} mm: w_out = ${fx(r.wOut*1000,2)} μm, z_R(공기) = ${sig(r.zRair,4)} mm, z_R(결정) = ${sig(r.zRcr,4)} mm, b = ${sig(r.b,4)} mm, ξ = ${sig(r.xi,3)}`,
-    `결정 위치(렌즈 주평면 기준): 앞면 ${fx(r.front,2)} mm, 중심 ${fx(r.center,2)} mm, 뒷면 ${fx(r.back,2)} mm`,
-    `결정 면 빔 직경 ${fx(2*r.wFace*1000,1)} μm, 개구 ${sig(P.apH,3)}×${sig(P.apW,3)} mm 투과율 ${fx(r.T*100,2)}%`];
-  const c=rows2.find(x=>x.f===selF2);
-  if(c&&S)txt.push(`평행광 렌즈(${S.name} ${sig(S.lam,5)} nm, 결정 안 허리 ${fx(S.w0*1000,2)} μm): f = ${fmm(c.f)} mm, 집속 렌즈에서 ${fx(c.z2,2)} mm (결정 뒷면에서 ${fx(c.gap,2)} mm), 위치 허용 ±${sig(c.zR,3)} mm`,
-    `평행광 직경 ${fx(2*c.wP,3)} mm, 발산 반각 ${fx(c.theta*1000,3)} mrad, z_R′ = ${fmtLen(c.zRp)}, 출력 허리 렌즈 뒤 ${fx(c.outW,1)} mm`);
+  const txt=[t("copyHead",P.lam,sig(P.win,4),sig(P.L,3),P.n.toFixed(4),P.m2),
+    t("copyL1",fmm(r.f),fx(r.wOut*1000,2),sig(r.zRair,4),sig(r.zRcr,4),sig(r.b,4),sig(r.xi,3)),
+    t("copyPos",fx(r.front,2),fx(r.center,2),fx(r.back,2)),
+    t("copyFace",fx(2*r.wFace*1000,1),sig(P.apH,3),sig(P.apW,3),fx(r.T*100,2))];
+  const c=st2&&rows2.find(x=>x.f===selF2);
+  if(c&&S)txt.push(t("copyL2",S.name,sig(S.lam,5),fx(S.w0*1000,2),fmm(c.f),fx(c.z2,2),fx(c.gap,2),sig(c.zR,3)),t("copyL2b",fx(2*c.wP,3),fx(c.theta*1000,3),fmtLen(c.zRp),fx(c.outW,1)));
   const out=txt.join("\n");
   const done=m=>{$("copyMsg").textContent=m;setTimeout(()=>$("copyMsg").textContent="",2500);};
-  try{navigator.clipboard.writeText(out).then(()=>done("복사했습니다"),()=>fallback(out,done));}catch(e){fallback(out,done);}
+  try{navigator.clipboard.writeText(out).then(()=>done(t("copied")),()=>fallback(out,done));}catch(e){fallback(out,done);}
 });
-function fallback(txt,done){const ta=document.createElement("textarea");ta.value=txt;ta.style.position="absolute";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand("copy");}catch(e){}ta.remove();done(ok?"복사했습니다":"복사가 막혀 있습니다. 상세 정보를 직접 선택해 주세요");}
+function fallback(txt,done){const ta=document.createElement("textarea");ta.value=txt;ta.style.position="absolute";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();let ok=false;try{ok=document.execCommand("copy");}catch(e){}ta.remove();done(ok?t("copied"):t("copyBlocked"));}
 
-/* ---------- A4 print summary ---------- */
+/* ---------- A4 print summary: the lenses the user selected ---------- */
 function buildPrint(){
   if(!P||!rows.length||validate(P))return false;
-  const best=rows.find(r=>r.f===bestF), sel=rows.find(r=>r.f===selF), okAny=rows.some(r=>r.ok);
-  const goal={"0.5":"순도 우선","1":"공초점","2.84":"생성률 최대"}[$("xiTarget").value]||"직접 지정";
+  const sel=rows.find(r=>r.f===selF), okAny=rows.some(r=>r.ok);
+  const c2=st2?rows2.find(r=>r.f===selF2):null;
+  const goal=t("goal")[$("xiTarget").value]||t("goalCustom");
   const now=new Date(), pd=n=>String(n).padStart(2,"0");
   const stamp=`${now.getFullYear()}-${pd(now.getMonth()+1)}-${pd(now.getDate())} ${pd(now.getHours())}:${pd(now.getMinutes())}`;
   const lm=$("lensMode").value;
-  const lensDesc=(lm==="step"?`${fmm(+$("fMin").value)}–${fmm(+$("fMax").value)} mm, ${fmm(+$("fStep").value)} mm 간격`:lm==="std"?"시판 표준 초점거리":"직접 입력 목록")+` (${rows.length}개)`;
-  const i=rows.indexOf(best);
-  let nb=rows.slice(Math.max(0,i-1),i+2);
-  if(sel&&!nb.includes(sel))nb=nb.concat(sel).sort((a,b)=>a.f-b.f);
+  const lensDesc=lm==="step"?t("psLensStep",fmm(+$("fMin").value),fmm(+$("fMax").value),fmm(+$("fStep").value),rows.length):lm==="std"?t("psLensStd",rows.length):t("psLensList",rows.length);
+  const i=rows.indexOf(sel);
+  const nb=rows.slice(Math.max(0,i-1),i+2);
   const st=(k,v)=>`<div><span>${k}</span><b>${v}</b></div>`;
   const status=r=>[xiClass(r.xi)[0],...problems(r).map(x=>x[1])].join(", ");
   const href=/^https?:/.test(location.href)?location.href.split("#")[0]:"";
-  let c2=null, S2=null;
-  if(!validate2()){const t=stage2Rows(best);S2=t.Src;c2=t.best;c2.okAny=t.okAny;c2.Dt=t.Dt;}
-  const tbl=nb.map(r=>`<tr class="${r.f===best.f?"best":""}"><td>${fmm(r.f)}${r.f===best.f?" ★":""}${sel&&r.f===sel.f&&r.f!==best.f?" (선택)":""}</td><td>${fx(r.wOut*1000,2)}</td><td>${sig(r.zRair,4)}</td><td>${sig(r.zRcr,4)}</td><td>${sig(r.xi,3)}</td><td>${fx(r.front,2)}</td><td>${fx(r.center,2)}</td><td>${fx(2*r.wFace*1000,1)}</td><td class="c">${status(r)}</td></tr>`).join("");
+  const isBest=sel.f===bestF&&(!c2||c2.f===bestF2);
+  const bestLine=isBest?t("psIsBest"):t("psBest",fmm(bestF),c2?fmm(bestF2):"");
+  const tbl=nb.map(r=>`<tr class="${r.f===sel.f?"best":""}"><td>${fmm(r.f)}${r.f===bestF?" ★":""}${r.f===sel.f?` (${t("psSel")})`:""}</td><td>${fx(r.wOut*1000,2)}</td><td>${sig(r.zRair,4)}</td><td>${sig(r.zRcr,4)}</td><td>${sig(r.xi,3)}</td><td>${fx(r.front,2)}</td><td>${fx(r.center,2)}</td><td>${fx(2*r.wFace*1000,1)}</td><td class="c">${status(r)}</td></tr>`).join("");
   $("printSheet").innerHTML=`
   <div class="ps-head">
-    <div><div class="ps-eyebrow">PPKTP 집속 렌즈 선택 요약${okAny?"":" · 조건을 모두 만족하는 렌즈가 없어 가장 가까운 후보를 표시"}</div>
-    <h1>집속 <span class="mono">f = ${fmm(best.f)} mm</span>, 결정 앞면 <span class="mono">${fx(best.front,1)} mm</span>${c2?` · 평행광 <span class="mono" style="color:var(--spdc)">f = ${fmm(c2.f)} mm</span>, 결정 뒷면에서 <span class="mono" style="color:var(--spdc)">${fx(c2.gap,1)} mm</span>`:""}</h1></div>
-    <div class="ps-meta">${stamp}<br>목표 ξ = ${sig(P.xiT,3)} (${goal})</div>
+    <div><div class="ps-eyebrow">${t("psEyebrow")}${okAny?"":" · "+t("noneOk")}</div>
+    <h1>${t("psTitle",fmm(sel.f),fx(sel.front,1),c2?fmm(c2.f):"",c2?fx(c2.gap,1):"")}</h1></div>
+    <div class="ps-meta">${stamp}<br>ξ = ${sig(P.xiT,3)} (${goal})<br>${bestLine}</div>
   </div>
   <div class="ps-grid">
-    <section class="ps-box"><h2>입력 조건</h2><dl>
-      <dt>파장 λ</dt><dd>${P.lam} nm</dd>
-      <dt>입사 빔 (1/e²)</dt><dd>w = ${sig(P.win,4)} mm · 2w = ${sig(2*P.win,4)} mm</dd>
-      <dt>M² · 입사 허리→렌즈</dt><dd>${P.m2} · ${sig(P.dIn,4)} mm</dd>
-      <dt>결정 길이 L</dt><dd>${sig(P.L,4)} mm</dd>
-      <dt>결정 단면</dt><dd>${sig(P.apH,3)} × ${sig(P.apW,3)} mm</dd>
-      <dt>굴절률 n</dt><dd>${P.n.toFixed(4)} ${$("nMode").value==="auto"?"(KTP n_y 자동)":"(직접 입력)"}</dd>
-      <dt>렌즈–결정 최소 간격</dt><dd>${sig(P.minGap,3)} mm</dd>
-      <dt>후보 렌즈</dt><dd>${lensDesc}</dd>
+    <section class="ps-box"><h2>${t("psInputs")}</h2><dl>
+      <dt>${t("psLam")}</dt><dd>${P.lam} nm</dd>
+      <dt>${t("psBeam")}</dt><dd>w = ${sig(P.win,4)} mm · 2w = ${sig(2*P.win,4)} mm</dd>
+      <dt>${t("psM2")}</dt><dd>${P.m2} · ${sig(P.dIn,4)} mm</dd>
+      <dt>${t("psL")}</dt><dd>${sig(P.L,4)} mm</dd>
+      <dt>${t("psAp")}</dt><dd>${sig(P.apH,3)} × ${sig(P.apW,3)} mm</dd>
+      <dt>${t("psN")}</dt><dd>${P.n.toFixed(4)} ${$("nMode").value==="auto"?t("psNauto"):t("psNman")}</dd>
+      <dt>${t("psGap")}</dt><dd>${sig(P.minGap,3)} mm</dd>
+      <dt>${t("psLens")}</dt><dd>${lensDesc}</dd>
     </dl></section>
-    <section class="ps-box ps-key"><h2>결정 설치 거리 (렌즈 주평면 기준)</h2>
+    <section class="ps-box ps-key"><h2>${t("psPos")}</h2>
       <div class="ps-big">
-        <div><span>결정 앞면</span><b>${fx(best.front,2)}<small> mm</small></b></div>
-        <div><span>결정 중심 (허리)</span><b>${fx(best.center,2)}<small> mm</small></b></div>
-        <div><span>결정 뒷면</span><b>${fx(best.back,2)}<small> mm</small></b></div>
+        <div><span>${t("pFront")}</span><b>${fx(sel.front,2)}<small> mm</small></b></div>
+        <div><span>${t("pCenter")}</span><b>${fx(sel.center,2)}<small> mm</small></b></div>
+        <div><span>${t("pBack")}</span><b>${fx(sel.back,2)}<small> mm</small></b></div>
       </div>
       <dl>
-        <dt>렌즈 초점 F</dt><dd>${fx(best.f,2)} mm</dd>
-        <dt>결정이 없을 때 허리 <span class='tex' data-tex='d_\\text{out}'>d<sub>out</sub></span></dt><dd>${fx(best.dOut,2)} mm</dd>
-        <dt>결정 때문에 허리가 밀리는 거리 <span class='tex' data-tex='\\Delta z'>Δz</span></dt><dd>+${fx(P.L/2*(1-1/P.n),2)} mm</dd>
+        <dt>${t("pF")}</dt><dd>${fx(sel.f,2)} mm</dd>
+        <dt>${t("pDout")}</dt><dd>${fx(sel.dOut,2)} mm</dd>
+        <dt>${t("pShift")}</dt><dd>+${fx(P.L/2*(1-1/P.n),2)} mm</dd>
       </dl>
     </section>
   </div>
-  <section class="ps-box"><h2>빔 파라미터 (f = ${fmm(best.f)} mm)</h2><div class="ps-stats">
-    ${st("집속 허리 반경 <span class='tex' data-tex='w_\\text{out}'>w<sub>out</sub></span>",fx(best.wOut*1000,2)+" μm")}
-    ${st("허리 직경 2<span class='tex' data-tex='w_\\text{out}'>w<sub>out</sub></span>",fx(2*best.wOut*1000,1)+" μm")}
-    ${st("<span class='tex' data-tex='z_R'>z<sub>R</sub></span> (공기)",sig(best.zRair,4)+" mm")}
-    ${st("<span class='tex' data-tex='z_R^\\text{KTP}'><span class='tex' data-tex='z_R'>z<sub>R</sub></span><sup>KTP</sup></span> (결정 안)",sig(best.zRcr,4)+" mm")}
-    ${st("b = 2<span class='tex' data-tex='z_R^\\text{KTP}'><span class='tex' data-tex='z_R'>z<sub>R</sub></span><sup>KTP</sup></span>",sig(best.b,4)+" mm")}
-    ${st("<span class='tex' data-tex='\\xi = L/b'>ξ = L/b</span> · "+xiClass(best.xi)[0],sig(best.xi,3))}
-    ${st("결정 면 빔 직경",fx(2*best.wFace*1000,1)+" μm")}
-    ${st("개구 투과율",fx(best.T*100,2)+"%")}
-    ${st("<span class='tex' data-tex='\\xi = 1,\\ 2.84'>ξ = 1, 2.84</span>가 되는 L",sig(best.b,3)+" / "+sig(2.84*best.b,3)+" mm")}
-    ${st("근사식 <span class='tex' data-tex='f\\lambda/\\pi w_\\text{in}'>fλ/πw<sub>in</sub></span> 오차",(best.approxErr>=0?"+":"")+fx(best.approxErr*100,2)+"%")}
+  <section class="ps-box"><h2>${t("psBeamH",fmm(sel.f))}</h2><div class="ps-stats">
+    ${st(t("sWout"),fx(sel.wOut*1000,2)+" μm")}
+    ${st(t("psWdiam"),fx(2*sel.wOut*1000,1)+" μm")}
+    ${st(t("sZR"),sig(sel.zRair,4)+" mm")}
+    ${st(t("sZRK"),sig(sel.zRcr,4)+" mm")}
+    ${st("b = 2"+SYM.zRK,sig(sel.b,4)+" mm")}
+    ${st(t("psXiCls",xiClass(sel.xi)[0]),sig(sel.xi,3))}
+    ${st(t("rFace"),fx(2*sel.wFace*1000,1)+" μm")}
+    ${st(t("psT"),fx(sel.T*100,2)+"%")}
+    ${st(t("psLFor"),sig(sel.b,3)+" / "+sig(2.84*sel.b,3)+" mm")}
+    ${st(t("psApErr"),(sel.approxErr>=0?"+":"")+fx(sel.approxErr*100,2)+"%")}
   </div></section>
-  ${c2?`<section class="ps-box" style="margin-top:7pt;border-color:var(--spdc)"><h2>평행광 렌즈 (2단계) · ${S2.name} ${sig(S2.lam,5)} nm${c2.okAny?"":" · 조건을 모두 만족하는 렌즈 없음"}</h2><div class="ps-stats">
-    ${st("평행광 렌즈 초점거리","f = "+fmm(c2.f)+" mm")}
-    ${st("집속 렌즈에서",fx(c2.z2,2)+" mm")}
-    ${st("결정 뒷면에서",fx(c2.gap,2)+" mm")}
-    ${st("렌즈 위치 허용","±"+sig(c2.zR,3)+" mm")}
-    ${st("출력 허리 (렌즈 뒤)",fx(c2.outW,1)+" mm")}
-    ${st("평행광 직경 2<span class='tex' data-tex='w^{\\prime}'>w′</span>",fx(2*c2.wP,3)+" mm")}
-    ${st("목표 직경",sig(c2.Dt,3)+" mm")}
-    ${st("발산 반각 <span class='tex' data-tex='\\theta'>θ</span>",fx(c2.theta*1000,3)+" mrad")}
-    ${st("<span class='tex' data-tex='z_R^{\\prime}'>z<sub>R</sub>′</span> (평행 유지)",fmtLen(c2.zRp))}
-    ${st("결정 안 허리 <span class='tex' data-tex='w_0'>w₀</span>",fx(S2.w0*1000,2)+" μm")}
+  ${c2?`<section class="ps-box" style="margin-top:7pt;border-color:var(--spdc)"><h2>${t("ps2H",S.name,sig(S.lam,5))}${st2.okAny?"":" · "+t("noneOk")}</h2><div class="ps-stats">
+    ${st(t("ps2f"),"f = "+fmm(c2.f)+" mm")}
+    ${st(t("ps2from1"),fx(c2.z2,2)+" mm")}
+    ${st(t("ps2fromBack"),fx(c2.gap,2)+" mm")}
+    ${st(t("ps2tol"),"±"+sig(c2.zR,3)+" mm")}
+    ${st(t("ps2out"),fx(c2.outW,1)+" mm")}
+    ${st(t("ps2D"),fx(2*c2.wP,3)+" mm")}
+    ${st(t("ps2Dt"),sig(st2.Dt,3)+" mm")}
+    ${st(t("ps2Th"),fx(c2.theta*1000,3)+" mrad")}
+    ${st(t("ps2Zr"),fmtLen(c2.zRp))}
+    ${st(t("ps2W0"),fx(S.w0*1000,2)+" μm")}
   </div></section>`:""}
-  <figure class="ps-fig"><svg viewBox="0 0 900 ${c2?280:270}" role="img" aria-label="전체 배치도">${c2?systemSVG(best,c2,S2):layoutSVG(best)}</svg>
-    <figcaption>전체 배치도. 가로는 실제 거리 비율, 세로(빔 반경, 결정 두께)는 같은 배율로 확대.${c2?" 결정 중심부터는 평행광으로 만들 빛.":""}</figcaption></figure>
-  <figure class="ps-fig"><svg viewBox="0 0 900 270" role="img" aria-label="결정 부근 확대도">${zoomSVG(best,false).s}</svg>
-    <figcaption>결정 부근 확대도. 가로는 렌즈로부터 거리(mm), 세로는 빔 반경(μm), 보라색 띠는 결정 안 레일리 범위 b.</figcaption></figure>
-  <section class="ps-box" style="margin-top:6pt"><h2>이웃 집속 렌즈 비교</h2>
-    <table class="ps-table"><thead><tr><th>f (mm)</th><th><span class='tex' data-tex='w_\\text{out}'>w<sub>out</sub></span> (μm)</th><th><span class='tex' data-tex='z_R'>z<sub>R</sub></span> 공기 (mm)</th><th><span class='tex' data-tex='z_R'>z<sub>R</sub></span> 결정 (mm)</th><th>ξ</th><th>앞면 (mm)</th><th>중심 (mm)</th><th>면 빔 직경 (μm)</th><th style="text-align:left">판정</th></tr></thead><tbody>${tbl}</tbody></table>
+  <figure class="ps-fig"><svg viewBox="0 0 900 ${c2?280:270}" role="img">${c2?systemSVG(sel,c2,S):layoutSVG(sel)}</svg>
+    <figcaption>${t("psLayoutCap")}${c2?t("psLayoutCap2"):""}</figcaption></figure>
+  <figure class="ps-fig"><svg viewBox="0 0 900 270" role="img">${zoomSVG(sel,false).s}</svg>
+    <figcaption>${t("psZoomCap")}</figcaption></figure>
+  <section class="ps-box" style="margin-top:6pt"><h2>${t("psNb")}</h2>
+    <table class="ps-table"><thead><tr>${t("psNbHead")}</tr></thead><tbody>${tbl}</tbody></table>
   </section>
-  <div class="ps-eqs">
-    <div class="tex disp" data-tex="w_\\text{out} = \\frac{w_\\text{in}\\, f}{\\sqrt{(d_\\text{in}-f)^2 + z_{R,\\text{in}}^2}}">w_out = w_in·f / √((d_in−f)² + z_R,in²)</div>
-    <div class="tex disp" data-tex="\\xi = \\frac{L}{2 n z_R}, \\quad z_\\text{front} = d_\\text{out} - \\frac{L}{2n}">ξ = L/(2n·z_R),  z_front = d_out − L/(2n)</div>
-    <div class="tex disp" data-tex="w_s = w_p\\sqrt{\\frac{\\lambda_s n_p}{\\lambda_p n_s}}">w_s = w_p·√(λ_s n_p/(λ_p n_s))</div>
-  </div>
-  <p class="ps-foot">얇은 렌즈, Self 공식. 거리는 렌즈 주평면 기준(평볼록 렌즈는 곡면 쪽 꼭짓점 근처). 집속 렌즈: 개구 투과율 99.5% 이상·최소 간격을 만족하며 ξ가 목표에 가장 가까운 것. 평행광 렌즈: 겉보기 허리에서 f₂ 떨어진 f–f 배치, SPDC 모드는 펌프와 같은 b 가정. 굴절률 자동값은 KTP n_y Sellmeier(Kato &amp; Takaoka 2002).${href?` · ${href}`:""}</p>`;
+  <div class="ps-eqs">${EQ.wout}${EQ.psXi}${EQ.psWs}</div>
+  <p class="ps-foot">${t("psFoot")}${href?` · ${href}`:""}</p>`;
   typesetIn($("printSheet"));
   return true;
 }
-$("printBtn").addEventListener("click",()=>{
-  if(!buildPrint()){$("copyMsg").textContent="입력값을 먼저 확인하세요";setTimeout(()=>$("copyMsg").textContent="",2500);return;}
+function doPrint(btn){
+  const msg=btn.parentElement.querySelector(".printMsg");
+  if(!buildPrint()){if(msg){msg.textContent=t("printErr");setTimeout(()=>msg.textContent="",2500);}return;}
   window.print();
-});
+}
+document.querySelectorAll(".printBtn").forEach(b=>b.addEventListener("click",()=>doPrint(b)));
 window.addEventListener("beforeprint",buildPrint);
-try{if(window.self!==window.top)$("printBtn").hidden=true;}catch(e){$("printBtn").hidden=true;}
+let framed=true;try{framed=window.self!==window.top;}catch(e){}
+if(framed)document.querySelectorAll(".printBtn").forEach(b=>b.hidden=true);
 
 /* ---------- controls ---------- */
 $("modeR").onclick=()=>{if(beamMode==="r")return;const v=+$("beamSize").value;beamMode="r";if(v>0)$("beamSize").value=+(v/2).toPrecision(6);run();};
@@ -1159,12 +1414,22 @@ $("modeD").onclick=()=>{if(beamMode==="d")return;const v=+$("beamSize").value;be
 $("Lpresets").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;$("L").value=b.dataset.v;userPicked=false;run();});
 $("xiSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;$("xiTarget").value=b.dataset.v;userPicked=false;run();if(b.dataset.v==="custom")$("xiCustom").focus();});
 $("lensSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;$("lensMode").value=b.dataset.v;userPicked=false;run();});
+document.querySelectorAll(".stepSeg").forEach(seg=>seg.addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;const v=+b.dataset.step;
+  $("lensMode").value="step";$("fStep").value=v;$("fMin").value=v;
+  if(+$("fMax").value<v)$("fMax").value=400;
+  userPicked=false;userPicked2=false;run();
+}));
+$("srcSeg").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;$("src").value=b.dataset.v;userPicked2=false;run2();});
+$("dPresets").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;$("dTarget").value=b.dataset.v==="in"?+(2*P.win).toPrecision(4):b.dataset.v;userPicked2=false;run2();});
 $("advBox").addEventListener("toggle",save);
+$("adv2").addEventListener("toggle",save);
 $("resetBtn").addEventListener("click",()=>{ids.forEach(k=>{const e=$(k);if(e.type==="checkbox")e.checked=DEF[k];else e.value=DEF[k];});beamMode="r";userPicked=false;userPicked2=false;run();});
 const resetPick=new Set(["beamSize","lambda","L","xiCustom","fMin","fMax","fStep","fList","apH","apW","minGap","nMode","nVal","dIn","m2"]);
-ids.forEach(k=>{const e=$(k);if(e.type==="hidden")return;e.addEventListener("input",()=>{if(IDS2.has(k)){if(k!=="onlyOK2")userPicked2=false;run2();return;}if(resetPick.has(k))userPicked=false;run();});});
+ids.forEach(k=>{const e=$(k);if(e.type==="hidden")return;e.addEventListener("input",()=>{if(IDS2.has(k)){if(k!=="onlyOK2")userPicked2=false;run2();return;}if(resetPick.has(k)){userPicked=false;userPicked2=false;}run();});});
 
-load();run();
+try{const l=localStorage.getItem(LANGKEY);if(l==="en"||l==="ko")lang=l;}catch(e){}
+load();applyStatic();run();
 if(window.__mjLoaded)window.__mjReady();
 })();
 </script>
